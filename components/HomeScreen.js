@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button, View, Text, StyleSheet} from 'react-native';
+import CameraView from './CameraView';
 
 export default function HomeScreen({navigation}) {
   const onUploadSignsPress = () => {
@@ -20,7 +21,7 @@ export default function HomeScreen({navigation}) {
 
   return (
     <View style={styles.view}>
-      <Text>Home Screen</Text>
+      <CameraView />
       <Button title="Symptoms" onPress={onSymptomsPress} />
       <Button title="Upload Signs" onPress={onUploadSignsPress} />
       <Button title="Measure Heart Rate" onPress={onMeasureHeartRatePress} />

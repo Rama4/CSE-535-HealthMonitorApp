@@ -34,3 +34,34 @@ yarn add @react-navigation/native-stack
 Added screens for home and symptom logging with the required buttons and lists.
 
 Successfully runs on Android device.
+
+## Add React-Native Vision Camera
+
+https://www.react-native-vision-camera.com/docs/guides
+
+    yarn add react-native-vision-camera
+
+    npx pod-install
+
+https://medium.com/@sisongqolosi/vision-camera-react-native-326b9dfb3188
+
+[Tesla's RN camera Doesn't support video]
+https://github.com/teslamotors/react-native-camera-kit
+yarn add react-native-camera-kit
+
+[using Expo camera]
+https://github.com/expo/expo/tree/main/packages/expo-camera#installation-in-bare-react-native-projects
+
+    npx install-expo-modules@latest
+
+    npx expo install expo-camera
+
+Added a few lines in the build.gradle and podfile for maven and permissions
+
+Ran this to build and run on Android: `npx expo run:android`
+
+Successfully runs on Android device.
+
+##
+
+https://github.com/imrohit007/Video-Recording-React-Native-Expo/blob/main/App.js
