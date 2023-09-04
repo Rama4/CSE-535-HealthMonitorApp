@@ -6,7 +6,7 @@ import {
 import {SymptomList, stringWithoutSpaces} from '../utils/symptomConstants';
 
 const DBName = 'healthmonitor.db';
-const TableName = 'healthdata';
+export const TableName = 'healthdata';
 
 const CreateTableQuery =
   `create table if not EXISTS ${TableName}  ( 
@@ -17,8 +17,20 @@ const CreateTableQuery =
 
 enablePromise(true);
 
+const errorCB = err => {
+  console.log('SQL Error: ' + err);
+};
+
+const successCB = err => {
+  console.log('SQL executed fine');
+};
+
+const openCB = err => {
+  console.log('Database OPENED');
+};
+
 export const getDBConnection = async () => {
-  return openDatabase({name: DBName, location: 'default'});
+  return openDatabase({name: DBName, location: 'default'}, openCB, errorCB);
 };
 
 export const createTable = async db => {
@@ -27,15 +39,17 @@ export const createTable = async db => {
   await db.executeSql(CreateTableQuery);
 };
 
-export const printAll = async (db = DBName, table = TableName) => {
+export const printTable = async (db = DBName, tableName = TableName) => {
   try {
-    // const todoItems = [];
-    const results = await db.executeSql(`SELECT * FROM ${table}`);
-    // results.forEach(result => {
-    //   for (let index = 0; index < result.rows.length; index++) {
-    //     todoItems.push(result.rows.item(index));
-    //   }
-    // });
+    const todoItems = [];
+    const results = await db.executeSql(`SELECT * FROM ${tableName}`);
+    results.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        todoItems.push(result.rows.item(index));
+      }
+    });
+    console.log('printing table:', tableName);
+    console.log(JSON.stringify(todoItems, null, 4));
     return results;
   } catch (error) {
     console.error(error);
@@ -43,98 +57,30 @@ export const printAll = async (db = DBName, table = TableName) => {
   }
 };
 
-export const getTodoItems = async db => {
+export const insertRow = async (db, tableName = TableName, symptomValues) => {
+  const query =
+    `INSERT INTO ${tableName} values (72, 20, ` +
+    symptomValues.map(s => `${s}`).join(',') +
+    ');';
+  console.log('query=', query);
   try {
     const todoItems = [];
-    const results = await db.executeSql(
-      `SELECT rowid as id,value FROM ${tableName}`,
-    );
+    const results = await db.executeSql(query);
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
         todoItems.push(result.rows.item(index));
       }
     });
-    return todoItems;
+    console.log(JSON.stringify(todoItems, null, 4));
+    return results;
   } catch (error) {
     console.error(error);
     // throw Error('Failed to get todoItems !!!');
   }
 };
 
-export const saveTodoItems = async (db, todoItems) => {
-  const insertQuery =
-    `INSERT OR REPLACE INTO ${tableName}(rowid, value) values` +
-    todoItems.map(i => `(${i.id}, '${i.value}')`).join(',');
-
-  return db.executeSql(insertQuery);
-};
-
-export const deleteTodoItem = async (db, id) => {
-  const deleteQuery = `DELETE from ${tableName} where rowid = ${id}`;
-  await db.executeSql(deleteQuery);
-};
-
-export const deleteTable = async db => {
+export const deleteTable = async (db, tableName = TableName) => {
   const query = `drop table ${tableName}`;
 
   await db.executeSql(query);
 };
-
-// const loadDataCallback = useCallback(async () => {
-//   try {
-//     const initTodos = [
-//       {id: 0, value: 'go to shop'},
-//       {id: 1, value: 'eat at least a one healthy foods'},
-//       {id: 2, value: 'Do some exercises'},
-//     ];
-//     const db = await getDBConnection();
-//     await createTable(db);
-//     const storedTodoItems = await getTodoItems(db);
-//     if (storedTodoItems.length) {
-//       setTodos(storedTodoItems);
-//     } else {
-//       await saveTodoItems(db, initTodos);
-//       setTodos(initTodos);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }, []);
-
-// useEffect(() => {
-//   loadDataCallback();
-// }, [loadDataCallback]);
-
-// const addTodo = async () => {
-//   if (!newTodo.trim()) return;
-//   try {
-//     const newTodos = [
-//       ...todos,
-//       {
-//         id:
-//           todos.reduce((acc, cur) => {
-//             if (cur.id > acc.id) return cur;
-//             return acc;
-//           }).id + 1,
-//         value: newTodo,
-//       },
-//     ];
-//     setTodos(newTodos);
-//     const db = await getDBConnection();
-//     await saveTodoItems(db, newTodos);
-//     setNewTodo('');
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
-
-// const deleteItem = async id => {
-//   try {
-//     const db = await getDBConnection();
-//     await deleteTodoItem(db, id);
-//     todos.splice(id, 1);
-//     setTodos(todos.slice(0));
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };

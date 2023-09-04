@@ -1,7 +1,13 @@
 import {useCallback} from 'react';
 import {Button, View, Text, StyleSheet} from 'react-native';
 import CameraView from './CameraView';
-import {getDBConnection, createTable} from '../services/data-service';
+import {
+  getDBConnection,
+  createTable,
+  insertRow,
+  printTable,
+  deleteTable,
+} from '../services/data-service';
 
 export default function HomeScreen({navigation}) {
   const onUploadSignsPress = () => {
@@ -23,9 +29,38 @@ export default function HomeScreen({navigation}) {
   const onCreateDBPress = useCallback(async () => {
     try {
       const db = await getDBConnection();
-      console.log('connected to DB..');
       await createTable(db);
       console.log('created table..');
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  const onInsertRowPress = useCallback(async () => {
+    try {
+      const db = await getDBConnection();
+      await insertRow(db);
+      console.log('added values into table..');
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  const onPrintTablePress = useCallback(async () => {
+    try {
+      const db = await getDBConnection();
+      await printTable(db);
+      console.log('printed table..');
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  const onDeleteTablePress = useCallback(async () => {
+    try {
+      const db = await getDBConnection();
+      await deleteTable(db);
+      console.log('deleted table..');
     } catch (error) {
       console.error(error);
     }
@@ -42,6 +77,9 @@ export default function HomeScreen({navigation}) {
         onPress={onMeasureRespiratoryRatePress}
       />
       <Button title="create DB" onPress={onCreateDBPress} />
+      <Button title="insert row" onPress={onInsertRowPress} />
+      <Button title="print table" onPress={onPrintTablePress} />
+      <Button title="delete table" onPress={onDeleteTablePress} />
     </View>
   );
 }

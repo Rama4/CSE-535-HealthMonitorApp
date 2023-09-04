@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,13 +8,17 @@ import {
 } from 'react-native';
 import {MaterialIcons} from '@expo/vector-icons';
 
-export default function StarRating({onSetStarRating}) {
-  const [starRating, setStarRating] = useState(null);
+export default function StarRating({rating, onSetStarRating}) {
+  const [starRating, setStarRating] = useState(rating ?? null);
 
   const onStarPress = starIndex => {
     setStarRating(starIndex);
     onSetStarRating && onSetStarRating(starIndex);
   };
+
+  useEffect(() => {
+    setStarRating(rating);
+  }, [rating]);
 
   return (
     <View style={styles.container}>
@@ -74,7 +78,6 @@ export default function StarRating({onSetStarRating}) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -88,9 +91,11 @@ const styles = StyleSheet.create({
   stars: {
     display: 'flex',
     flexDirection: 'row',
+    color: 'black',
   },
   starUnselected: {
-    color: '#aaa',
+    // color: '#aaa',
+    color: 'black',
   },
   starSelected: {
     color: '#ffb300',

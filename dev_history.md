@@ -89,3 +89,15 @@ DB connected and table created.
 https://www.atomlab.dev/tutorials/react-native-star-rating
 
 Rating component created and working successfully.
+
+### add insertRow, printTable functions to check the functioning of the DB
+
+sqlite db crud complete: clear db, drop table, insert row, print table functionalities.
+
+## Sqlite crud working, change and store rating for each symptom.
+
+able to change and set rating for every symptom and upload to sqlite db.
+
+run app in Production mode:
+
+    npx expo start --no-dev --minify

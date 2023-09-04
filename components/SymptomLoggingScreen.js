@@ -1,70 +1,145 @@
-import {useState} from 'react';
-import {Button, View, Text, FlatList, StyleSheet} from 'react-native';
+import {useCallback, useState, useEffect} from 'react';
+import {View, Text, FlatList, StyleSheet, Pressable} from 'react-native';
 import {SymptomList} from '../utils/symptomConstants';
 import StarRating from './StarRating';
+import {
+  getDBConnection,
+  createTable,
+  insertRow,
+  printTable,
+  deleteTable,
+  TableName,
+} from '../services/data-service';
+import Button from './Button';
 
 export default function SymptomLoggingScreen() {
-  const [selectedSymptom, setSelectedSymptom] = useState('');
-  const [rating, setRating] = useState(0);
+  const [symptomValues, setSymptomValues] = useState(
+    new Array(SymptomList.length).fill(0),
+  );
+  const [selectedSymptom, setSelectedSymptom] = useState(-1);
+  const starRating = selectedSymptom >= 0 ? symptomValues[selectedSymptom] : 0;
 
-  const renderSelectedSymptom = () => {
-    const selectedItemText =
-      'Selected Symptom: ' +
-      (selectedSymptom?.length ? selectedSymptom : 'None');
-    return <Text style={styles.text}>{selectedItemText}</Text>;
+  useEffect(() => {
+    console.log(
+      'selectedSymptom = ',
+      selectedSymptom ? SymptomList[selectedSymptom] : 'none',
+    );
+    console.log('starRating=', starRating);
+  }, [selectedSymptom]);
+  useEffect(() => {
+    console.log('symptomValues = ', symptomValues);
+    console.log('starRating=', starRating);
+  }, [symptomValues]);
+
+  const onUploadSymptomsPress = useCallback(async () => {
+    try {
+      const db = await getDBConnection();
+      console.log(symptomValues);
+      await insertRow(db, TableName, symptomValues);
+      console.log('added values into table..');
+    } catch (error) {
+      console.error(error);
+    }
+  }, [symptomValues]);
+
+  const separator = () => {
+    //add a seperator component for each item with green color:
+    return <View style={styles.separator} />;
   };
 
-  const onSymptomPress = symptom => {
-    console.log('selected:', symptom);
-    setSelectedSymptom(symptom);
+  const onSymptomPress = index => {
+    console.log('selected:', SymptomList[index]);
+    setSelectedSymptom(index);
+    // setRating(symptomValues[index]);
   };
 
   const renderSymptomListItem = ({item, index}) => {
     return (
-      <Button key={index} title={item} onPress={() => onSymptomPress(item)} />
+      <Pressable
+        style={styles.symptomListButton}
+        key={index}
+        onPress={() => onSymptomPress(index)}>
+        <Text style={styles.text}>{item}</Text>
+      </Pressable>
     );
   };
 
-  const onSetStarRating = index => {
-    setRating(index);
-    console.log(`onSetStarRating: ${index}`);
+  const onSetStarRating = val => {
+    // setRating(val);
+    console.log(`onSetStarRating: ${val}`);
+    setSymptomValues(_symptomValues => {
+      let symptoms = [..._symptomValues];
+      symptoms[selectedSymptom] = val;
+      return symptoms;
+    });
+  };
+
+  const renderStarRating = () => {
+    if (selectedSymptom >= 0) {
+      return (
+        <>
+          <Text style={styles.text}>
+            Set rating for the symptom: {SymptomList[selectedSymptom]}
+          </Text>
+          {/* <StarRating onSetStarRating={onSetStarRating} /> */}
+          <StarRating rating={starRating} onSetStarRating={onSetStarRating} />
+        </>
+      );
+    }
   };
 
   const renderSymptomList = () => {
     return (
-      <>
-        {renderSelectedSymptom()}
+      <View style={styles.listContainer}>
         <FlatList
           data={SymptomList}
           renderItem={renderSymptomListItem}
           style={styles.flatlist}
+          ItemSeparatorComponent={separator}
+          persistentScrollbar={true}
         />
-        {selectedSymptom !== '' && (
-          <StarRating onSetStarRating={onSetStarRating} />
-        )}
-      </>
+        {renderStarRating()}
+      </View>
     );
   };
 
-  return <View style={styles.view}>{renderSymptomList()}</View>;
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>
+        Select symptom from the list and select a rating for it:
+      </Text>
+      {renderSymptomList()}
+      <Button title="Upload Symptoms" onPress={onUploadSymptomsPress} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    flexDirection: 'column',
   },
   text: {
-    fontSize: 30,
-    color: '#000',
+    fontSize: 24,
+    // color: 'white',
   },
-  view: {
+  listContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
+    flexDirection: 'column',
   },
   flatlist: {
-    padding: 10,
+    paddingHorizontal: 10,
+    // backgroundColor: 'orange',
+    minHeight: 300,
+    maxHeight: '40%',
+  },
+  symptomListButton: {
+    backgroundColor: 'lightgray',
+  },
+  separator: {
+    borderBottomColor: 'gray',
+    borderBottomWidth: 2,
   },
 });
