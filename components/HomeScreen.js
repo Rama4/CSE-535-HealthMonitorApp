@@ -1,6 +1,7 @@
-import React from 'react';
+import {useCallback} from 'react';
 import {Button, View, Text, StyleSheet} from 'react-native';
 import CameraView from './CameraView';
+import {getDBConnection, createTable} from '../services/data-service';
 
 export default function HomeScreen({navigation}) {
   const onUploadSignsPress = () => {
@@ -19,6 +20,17 @@ export default function HomeScreen({navigation}) {
     // navigation.navigate('SymptomLogging');
   };
 
+  const onCreateDBPress = useCallback(async () => {
+    try {
+      const db = await getDBConnection();
+      console.log('connected to DB..');
+      await createTable(db);
+      console.log('created table..');
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
   return (
     <View style={styles.view}>
       <CameraView />
@@ -29,6 +41,7 @@ export default function HomeScreen({navigation}) {
         title="Measure Respiratory Rate"
         onPress={onMeasureRespiratoryRatePress}
       />
+      <Button title="create DB" onPress={onCreateDBPress} />
     </View>
   );
 }

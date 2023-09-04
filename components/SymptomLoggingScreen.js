@@ -1,21 +1,11 @@
 import {useState} from 'react';
 import {Button, View, Text, FlatList, StyleSheet} from 'react-native';
-
-const SymptomList = [
-  'Nausea',
-  'Headache',
-  'Diarrhea',
-  'Sore Throat',
-  'Fever',
-  'Muscle Ache',
-  'Loss of Smell or Taste',
-  'Cough',
-  'Shortness of Breath',
-  'Feeling tired',
-];
+import {SymptomList} from '../utils/symptomConstants';
+import StarRating from './StarRating';
 
 export default function SymptomLoggingScreen() {
   const [selectedSymptom, setSelectedSymptom] = useState('');
+  const [rating, setRating] = useState(0);
 
   const renderSelectedSymptom = () => {
     const selectedItemText =
@@ -35,6 +25,11 @@ export default function SymptomLoggingScreen() {
     );
   };
 
+  const onSetStarRating = index => {
+    setRating(index);
+    console.log(`onSetStarRating: ${index}`);
+  };
+
   const renderSymptomList = () => {
     return (
       <>
@@ -44,6 +39,9 @@ export default function SymptomLoggingScreen() {
           renderItem={renderSymptomListItem}
           style={styles.flatlist}
         />
+        {selectedSymptom !== '' && (
+          <StarRating onSetStarRating={onSetStarRating} />
+        )}
       </>
     );
   };

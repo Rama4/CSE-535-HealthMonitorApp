@@ -75,3 +75,17 @@ yarn add react-native-video
 Able to record videos using expo-camera and play/pause them (not persisting them).
 
 Flash also working and configurable (it is turning on if we set FlashMode.torch, instead of FlashMode.on)
+
+## Add SQLite storage api and Star Rating component
+
+https://blog.logrocket.com/using-sqlite-with-react-native/
+
+yarn add react-native-sqlite-storage
+
+DB connected and table created.
+
+### Add Star Rating component
+
+https://www.atomlab.dev/tutorials/react-native-star-rating
+
+Rating component created and working successfully.
