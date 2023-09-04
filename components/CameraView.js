@@ -1,35 +1,37 @@
-import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {
-  View,
-  StyleSheet,
-  Button,
-  TouchableOpacity,
-  Text,
-  Linking,
-  Image,
-  PermissionsAndroid,
-} from 'react-native';
+import React, {useEffect, useState, useRef} from 'react';
+import {View, StyleSheet, Button, Text, Linking} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
-import {Camera} from 'expo-camera';
-// import {Video} from 'expo-av';
+import {Camera, FlashMode, CameraType} from 'expo-camera';
+import Video from 'react-native-video';
 
-const CameraState = Object.freeze({
+const CAMERA_STATE = Object.freeze({
   active: 0,
   recording: 1,
   paused: 2,
 });
 
 export default function CameraView({navigation}) {
-  // Todo: change isActive value to isFocused and check.
   const [hasAudioPermission, setHasAudioPermission] = useState(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [camera, setCamera] = useState(null);
   const [record, setRecord] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
-  const video = React.useRef(null);
-  const [status, setStatus] = React.useState({});
+  const video = useRef(null);
+  const [cameraState, setCameraState] = useState(CAMERA_STATE.active);
+  const [isVideoPaused, setIsVideoPaused] = useState(false);
 
   const isFocussed = useIsFocused();
+
+  const [flashMode, setFlashMode] = React.useState(FlashMode.off);
+
+  const __handleFlashMode = () => {
+    if (flashMode === FlashMode.on) {
+      setFlashMode(FlashMode.off);
+    } else if (flashMode === FlashMode.off) {
+      setFlashMode(FlashMode.torch);
+    } else {
+      setFlashMode(FlashMode.auto);
+    }
+  };
 
   useEffect(() => {
     async function getPermission() {
@@ -44,96 +46,32 @@ export default function CameraView({navigation}) {
       setHasAudioPermission(microphonePermission.status === 'granted');
       if (microphonePermission === 'denied') await Linking.openSettings();
     }
-    // async function getAvailableCameras() {
-    //   const devices = await Camera.getAvailableCameraDevices();
-    //   console.log(`available cameras:`);
-    //   console.log(devices);
-    // }
     getPermission();
-    // getAvailableCameras();
   }, []);
 
-  // const capturePhoto = async () => {
-  //   if (camera.current !== null) {
-  //     const photo = await camera.current.takePhoto({});
-  //     setImageSource(photo.path);
-  //     setShowCamera(false);
-  //     console.log(photo.path);
-  //   }
-  // };
-
-  // const pauseVideo = async () => {
-  //   if (camera.current !== null) {
-  //     if (cameraState === CameraState.recording) {
-  //       await camera.current.pauseRecording();
-  //       setCameraState(CameraState.paused);
-  //     } else if (cameraState === CameraState.paused) {
-  //       await camera.current.resumeRecording();
-  //       setCameraState(CameraState.recording);
-  //     }
-  //   }
-  // };
-
-  // const captureVideo = async () => {
-  //   if (camera.current !== null) {
-  //     // setShowCamera(false);
-  //     camera.current.startRecording({
-  //       flash: 'off',
-  //       onRecordingFinished: video => console.log(video),
-  //       onRecordingError: error => console.error(error),
-  //     });
-  //     setCameraState(CameraState.recording);
-  //   }
-  // };
-  const takeVideo = async () => {
+  const onRecordPress = async () => {
+    console.log('onrecordPress: ', cameraState);
     if (camera) {
-      const data = await camera.recordAsync({
-        maxDuration: 45,
-      });
-      setRecord(data.uri);
-      console.log(data.uri);
+      if (cameraState === CAMERA_STATE.active) {
+        setFlashMode(FlashMode.torch);
+
+        setCameraState(CAMERA_STATE.recording);
+
+        const data = await camera.recordAsync({
+          maxDuration: 45,
+        });
+        console.log('after recording done');
+
+        setRecord(data.uri);
+        console.log(data.uri);
+      } else {
+        setFlashMode(FlashMode.off);
+        camera.stopRecording();
+        setCameraState(CAMERA_STATE.active);
+        console.log('after setting state:', cameraState);
+      }
     }
   };
-
-  const stopVideo = async () => {
-    camera.stopRecording();
-  };
-
-  // if (device == null) {
-  //   return <Text>Camera not available</Text>;
-  // }
-
-  // const renderRecordingVideo = () => {
-  //   return (
-  //     <View>
-  //       <Camera
-  //         ref={camera}
-  //         style={[styles.camera, styles.photoAndVideoCamera]}
-  //         device={device}
-  //         isActive
-  //         video
-  //       />
-  //       <View style={styles.btnGroup}>
-  //         <TouchableOpacity style={styles.btn} onPress={captureVideo}>
-  //           <Text style={styles.btnText}>Record Video</Text>
-  //         </TouchableOpacity>
-  //         <TouchableOpacity style={{...styles.btn}} onPress={stopVideo}>
-  //           <Text style={styles.btnText}>Stop Video</Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //       {/* {videoPath && <Video source={{uri: videoPath}} style={styles.video} />} */}
-  //     </View>
-  //   );
-  // };
-
-  // const onInitialized = useCallback(() => {
-  //   console.log('Camera initialized!');
-  //   setIsCameraInitialized(true);
-  // }, []);
-
-  // const onError = useCallback(error => {
-  //   console.error(error);
-  // }, []);
 
   if (hasCameraPermission === null || hasAudioPermission === null) {
     return <Text>Permissions are null</Text>;
@@ -142,68 +80,89 @@ export default function CameraView({navigation}) {
     return <Text>No access to camera</Text>;
   }
   return (
-    <View style={{flex: 1}}>
-      <View style={styles.cameraContainer}>
-        <Camera
-          ref={ref => setCamera(ref)}
-          style={styles.fixedRatio}
-          type={type}
-          ratio={'4:3'}
-        />
+    <View style={styles.containerView}>
+      <View style={styles.cameraVideoContainer}>
+        <View style={styles.cameraContainer}>
+          {isFocussed && (
+            <Camera
+              flashMode={flashMode}
+              ref={ref => setCamera(ref)}
+              style={styles.fixedRatio}
+              cameraType={CameraType.back}
+            />
+          )}
+        </View>
+        <View style={styles.cameraContainer}>
+          <Video
+            ref={video}
+            style={styles.video}
+            source={{
+              uri: record,
+            }}
+            useNativeControls
+            resizeMode="contain"
+            paused={isVideoPaused}
+            onPlaybackStatusUpdate={status =>
+              console.log('onPlaybackStatusUpdate:', status)
+            }
+          />
+        </View>
       </View>
-      {/* <Video
-        ref={video}
-        style={styles.video}
-        source={{
-          uri: record,
-        }}
-        useNativeControls
-        resizeMode="contain"
-        isLooping
-        onPlaybackStatusUpdate={status => setStatus(() => status)}
-      /> */}
-      {/* <View style={styles.buttons}>
+      <View style={styles.buttonsContainer}>
         <Button
-          title={status.isPlaying ? 'Pause' : 'Play'}
-          onPress={() =>
-            status.isPlaying
-              ? video.current.pauseAsync()
-              : video.current.playAsync()
+          title={
+            cameraState === CAMERA_STATE.active
+              ? 'Start Recording'
+              : 'Stop Recording'
           }
+          onPress={onRecordPress}
         />
-      </View> */}
-      <Button
-        title="Flip Video"
-        onPress={() => {
-          setType(
-            type === Camera.Constants.Type.back
-              ? Camera.Constants.Type.front
-              : Camera.Constants.Type.back,
-          );
-        }}></Button>
-      <Button title="Take video" onPress={() => takeVideo()} />
-      <Button title="Stop Video" onPress={() => stopVideo()} />
+        <Button
+          title={
+            flashMode !== FlashMode.on ? 'Turn on Flash' : 'Turn off Flash'
+          }
+          onPress={__handleFlashMode}
+        />
+        <View style={styles.buttonHalfContainer}></View>
+        <View style={styles.buttonHalfContainer}>
+          <Button
+            title={!isVideoPaused ? 'Pause' : 'Play'}
+            onPress={() => setIsVideoPaused(_isVideoPaused => !_isVideoPaused)}
+          />
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  containerView: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    // backgroundColor: 'red',
+  },
+  cameraVideoContainer: {
+    flexDirection: 'row',
+    // backgroundColor: 'green',
+  },
   cameraContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
+    height: 300,
+    // backgroundColor: 'blue',
   },
   fixedRatio: {
     flex: 1,
-    aspectRatio: 1,
   },
   video: {
-    alignSelf: 'center',
-    width: 350,
-    height: 220,
+    flex: 1,
   },
-  buttons: {
+  buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+  },
+  buttonHalfContainer: {
+    flex: 1,
   },
 });

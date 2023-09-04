@@ -62,6 +62,16 @@ Ran this to build and run on Android: `npx expo run:android`
 
 Successfully runs on Android device.
 
-##
+## Record video with flash and play it
 
 https://github.com/imrohit007/Video-Recording-React-Native-Expo/blob/main/App.js
+
+https://www.smashingmagazine.com/2018/04/audio-video-recording-react-native-expo/
+
+Add react-native-video package
+
+yarn add react-native-video
+
+Able to record videos using expo-camera and play/pause them (not persisting them).
+
+Flash also working and configurable (it is turning on if we set FlashMode.torch, instead of FlashMode.on)
