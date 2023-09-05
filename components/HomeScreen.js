@@ -1,5 +1,5 @@
 import {useCallback} from 'react';
-import {Button, View, Text, StyleSheet} from 'react-native';
+import {View, StyleSheet, ScrollView} from 'react-native';
 import CameraView from './CameraView';
 import {
   getDBConnection,
@@ -8,6 +8,7 @@ import {
   printTable,
   deleteTable,
 } from '../services/data-service';
+import Button from './Button';
 
 export default function HomeScreen({navigation}) {
   const onUploadSignsPress = () => {
@@ -66,21 +67,42 @@ export default function HomeScreen({navigation}) {
     }
   }, []);
 
+  const onRespRateSensorPress = () => {
+    console.log(' onRespRateSensorPress');
+    navigation.navigate('RespiratorySensor');
+  };
+
   return (
-    <View style={styles.view}>
-      <CameraView />
-      <Button title="Symptoms" onPress={onSymptomsPress} />
-      <Button title="Upload Signs" onPress={onUploadSignsPress} />
-      <Button title="Measure Heart Rate" onPress={onMeasureHeartRatePress} />
-      <Button
-        title="Measure Respiratory Rate"
-        onPress={onMeasureRespiratoryRatePress}
-      />
-      <Button title="create DB" onPress={onCreateDBPress} />
-      <Button title="insert row" onPress={onInsertRowPress} />
-      <Button title="print table" onPress={onPrintTablePress} />
-      <Button title="delete table" onPress={onDeleteTablePress} />
-    </View>
+    <ScrollView>
+      <View style={styles.view}>
+        <CameraView />
+        <View style={styles.rowContainer}>
+          <Button title="Symptoms" onPress={onSymptomsPress} />
+          <Button title="Upload Signs" onPress={onUploadSignsPress} />
+        </View>
+        <View style={styles.rowContainer}>
+          <Button
+            title="Measure Heart Rate"
+            onPress={onMeasureHeartRatePress}
+          />
+        </View>
+        <View style={styles.rowContainer}>
+          <Button
+            title="Measure Respiratory Rate"
+            onPress={onMeasureRespiratoryRatePress}
+          />
+        </View>
+        <View style={styles.rowContainer}>
+          <Button title="create DB" onPress={onCreateDBPress} />
+          <Button title="insert row" onPress={onInsertRowPress} />
+        </View>
+        <View style={styles.rowContainer}>
+          <Button title="print table" onPress={onPrintTablePress} />
+          <Button title="delete table" onPress={onDeleteTablePress} />
+        </View>
+        <Button title="RespRate Sensor" onPress={onRespRateSensorPress} />
+      </View>
+    </ScrollView>
   );
 }
 
@@ -90,13 +112,15 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: '#fff',
   },
-  text: {
-    fontSize: 30,
-    color: '#000',
-  },
   view: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  rowContainer: {
+    // flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 15,
   },
 });

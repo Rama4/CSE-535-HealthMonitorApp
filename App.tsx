@@ -1,9 +1,9 @@
 import * as React from 'react';
-
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeScreen from './components/HomeScreen';
 import SymptomLoggingScreen from './components/SymptomLoggingScreen';
+import RespiratorySensor from './components/RespiratorySensor';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +17,13 @@ export default function App() {
           component={SymptomLoggingScreen}
           options={{
             title: 'Symptom Logging Page',
+          }}
+        />
+        <Stack.Screen
+          name="RespiratorySensor"
+          component={RespiratorySensor}
+          options={{
+            title: 'Respiratory Rate Sensor',
           }}
         />
       </Stack.Navigator>

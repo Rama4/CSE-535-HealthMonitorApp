@@ -101,3 +101,31 @@ able to change and set rating for every symptom and upload to sqlite db.
 run app in Production mode:
 
     npx expo start --no-dev --minify
+
+## Respiratory Rate Calculator - basic functionality
+
+    using: https://www.npmjs.com/package/react-native-sensors
+
+    https://react-native-sensors.github.io/docs/Installation.html
+
+    install package  with : `yarn add react-native-sensors`
+
+    Followed Android configuration instructions
+
+    In MainApplication.java, linking at runtime was not necessary, got an error that the app is attempting to link an already linked library.. so skipped that part in the guide:
+
+        // Adding react-native-sensors package link
+        // Apparently not necessary, as it is linked already.
+        // packages.add(new RNSensorsPackage());
+
+    https://react-native-sensors.github.io/docs/Usage.html#Raw-device-acceleration
+
+    https://github.com/react-native-sensors/react-native-sensors/blob/master/docs/API.md
+
+    To compare previous and current emitted objects in the Subscription, used pairwise() to achieve it:
+        https://rxjs.dev/api/operators/pairwise
+
+        https://stackoverflow.com/questions/50059622/rxjs-observable-which-emits-both-previous-and-current-value-starting-from-first
+
+    Basic functionality of Accelerometer is working.
+    Code refactored, UI slightly improved..

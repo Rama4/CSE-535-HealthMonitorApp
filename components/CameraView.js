@@ -93,19 +93,21 @@ export default function CameraView({navigation}) {
           )}
         </View>
         <View style={styles.cameraContainer}>
-          <Video
-            ref={video}
-            style={styles.video}
-            source={{
-              uri: record,
-            }}
-            useNativeControls
-            resizeMode="contain"
-            paused={isVideoPaused}
-            onPlaybackStatusUpdate={status =>
-              console.log('onPlaybackStatusUpdate:', status)
-            }
-          />
+          {record && (
+            <Video
+              ref={video}
+              style={styles.video}
+              source={{
+                uri: record,
+              }}
+              useNativeControls
+              resizeMode="contain"
+              paused={isVideoPaused}
+              onPlaybackStatusUpdate={status =>
+                console.log('onPlaybackStatusUpdate:', status)
+              }
+            />
+          )}
         </View>
       </View>
       <View style={styles.buttonsContainer}>
