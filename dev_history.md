@@ -133,3 +133,11 @@ run app in Production mode:
 ## Sample Native Module invocation working
 
     able to invoke custom native module methods
+
+## Resp Rate Calculator - better
+
+    refactored the code.
+    still not getting accurate readings, need to factor in gravity in the readings..
+
+    1000ms has better accuracy
+    100ms not good
