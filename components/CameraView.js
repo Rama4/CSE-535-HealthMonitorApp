@@ -16,12 +16,15 @@ import {
   requestCameraPermissionsAsync,
 } from 'expo-camera';
 import Video from 'react-native-video';
+import RNFS from 'react-native-fs';
 
 const CAMERA_STATE = Object.freeze({
   active: 0,
   recording: 1,
   paused: 2,
 });
+
+const HeartRateMonitorTimeLimitSecs = 5;
 
 export default function CameraView({navigation}) {
   const [hasAudioPermission, setHasAudioPermission] = useState(null);
@@ -32,6 +35,8 @@ export default function CameraView({navigation}) {
   const video = useRef(null);
   const [cameraState, setCameraState] = useState(CAMERA_STATE.active);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
+  const [heartRate, setHeartRate] = useState(null);
+  const [message, setMessage] = useState('');
 
   const {HeartRateMonitorModule} = NativeModules;
   const isFocussed = useIsFocused();
@@ -72,14 +77,27 @@ export default function CameraView({navigation}) {
       } catch (e) {
         console.error(e);
       } finally {
-        HeartRateMonitorModule?.processVideo('test');
+        // HeartRateMonitorModule?.processVideo('test');
       }
     }
 
     getPermission();
+    const videoPath =
+      RNFS.ExternalStorageDirectoryPath + '/HeartRateTempVideo.mp4';
+
+    // RNFS.exists(videoPath)
+    //   .then(exist => console.log('video path path exist:', exist))
+    //   .catch(e => console.error(e));
+    // HeartRateMonitorModule.foo();
+
+    // RNFS.exists('android/app/src/main/assets').then(exist => console.log('file path exist:',exist)).catch(e=>console.error(e));
     // requestStorageVideoPermissions();
-    HeartRateMonitorModule?.foo();
+    // HeartRateMonitorModule?.foo();
   }, []);
+
+  useEffect(() => {
+    console.log('heartRate=', heartRate);
+  }, [heartRate]);
 
   // const turnFlash = fm => {
   //   if (flashMode !== fm) {
@@ -95,14 +113,16 @@ export default function CameraView({navigation}) {
 
         setCameraState(CAMERA_STATE.recording);
 
+        setMessage('Now recording heart rate');
         camera
           .recordAsync({
-            maxDuration: 5,
+            maxDuration: HeartRateMonitorTimeLimitSecs,
           })
           .then(data => {
             // console.log(JSON.stringify(data, null, 4));
             console.log(data?.uri);
             setRecord(data?.uri);
+            setMessage('Recorded heart rate, processing...');
             // console.log('after recording done');
 
             // HeartRateMonitorModule?.convertMediaUriToPath('adda');
@@ -110,6 +130,25 @@ export default function CameraView({navigation}) {
             // let p = null;
             // HeartRateMonitorModule.processVideo(data.uri);
             // console.log(p);
+            const videoPath =
+              RNFS.ExternalStorageDirectoryPath + '/HeartRateTempVideo.mp4';
+            RNFS.moveFile(data.uri, videoPath)
+              .then(() => console.log('moveFile done!'))
+              .catch(e => console.error(e))
+              .finally(() => {
+                // Now 'videoPath' contains the path to the saved video
+                console.log('Video saved at:', videoPath);
+                HeartRateMonitorModule.extractFrames((res, rate) => {
+                  setHeartRate(rate);
+                  setMessage(`Your Heart Rate is: ${rate} bpm`);
+                  console.log(
+                    'HeartRateMonitorModule.extractFrames:rate=',
+                    rate,
+                    'result = ',
+                    res,
+                  );
+                });
+              });
           })
           .catch(e => console.error(e))
           .finally(() => {
@@ -132,6 +171,7 @@ export default function CameraView({navigation}) {
   if (hasCameraPermission === false || hasAudioPermission === false) {
     return <Text>No access to camera</Text>;
   }
+
   return (
     <View style={styles.containerView}>
       <View style={styles.cameraVideoContainer}>
@@ -146,7 +186,7 @@ export default function CameraView({navigation}) {
           )}
         </View>
         <View style={styles.cameraContainer}>
-          {record && (
+          {/* {record && (
             <Video
               ref={video}
               style={styles.video}
@@ -160,31 +200,31 @@ export default function CameraView({navigation}) {
                 console.log('onPlaybackStatusUpdate:', status)
               }
             />
-          )}
+          )} */}
+          <Text style={styles.heartRatetext}>{message}</Text>
         </View>
       </View>
       <View style={styles.buttonsContainer}>
         <Button
           title={
             cameraState === CAMERA_STATE.active
-              ? 'Start Recording'
+              ? 'Measure Heart Rate'
               : 'Stop Recording'
           }
           onPress={onRecordPress}
         />
-        <Button
+        {/* <Button
           title={
             flashMode !== FlashMode.on ? 'Turn on Flash' : 'Turn off Flash'
           }
           onPress={__handleFlashMode}
-        />
-        <View style={styles.buttonHalfContainer}></View>
-        <View style={styles.buttonHalfContainer}>
+        /> */}
+        {/* <View style={styles.buttonHalfContainer}>
           <Button
             title={!isVideoPaused ? 'Pause' : 'Play'}
             onPress={() => setIsVideoPaused(_isVideoPaused => !_isVideoPaused)}
           />
-        </View>
+        </View> */}
       </View>
     </View>
   );
@@ -209,6 +249,7 @@ const styles = StyleSheet.create({
   },
   fixedRatio: {
     flex: 1,
+    // width: 200,
   },
   video: {
     flex: 1,
@@ -218,6 +259,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonHalfContainer: {
+    flex: 1,
+  },
+  heartRatetext: {
+    fontSize: 24,
+    padding: 20,
     flex: 1,
   },
 });

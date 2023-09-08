@@ -1,53 +1,53 @@
 package com.healthmonitor;
-import android.content.ContentResolver;
-import android.database.Cursor;
-import android.net.Uri;
-import android.util.Log;
-import android.provider.MediaStore;
+
+import androidx.annotation.NonNull;
+
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Promise;
 
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.MediaMetadataRetriever;
-import android.os.AsyncTask;
-import com.facebook.react.bridge.*;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.util.Base64;
 
-import java.io.File;
+import com.facebook.react.bridge.Arguments;
+
+import android.net.Uri;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.os.AsyncTask;
+import android.provider.MediaStore;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Service;
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.provider.MediaStore;
 import android.content.Context;
-import android.util.Log;
 
-import android.content.Context;
-import android.os.Environment;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
-import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
+import android.content.res.AssetManager;
 
 public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
-   HeartRateMonitorModule(ReactApplicationContext context) {
-       super(context);
-   }
+    private final ReactApplicationContext reactContext;
+    private static final String ASSET_PREFIX = "asset:///";
+    private Callback callback;
+
+    HeartRateMonitorModule(ReactApplicationContext reactContext) {
+        super(reactContext);
+        this.reactContext = reactContext;
+    }
 
     @Override
     public String getName() {
@@ -55,78 +55,153 @@ public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void foo() {
-        Log.d("HeartRateMonitorModule", "Hi da");
+    public void extractFrames(final Callback callback) {
+        this.callback = callback;
+        try {
+            ExtractFramesTask task = new ExtractFramesTask();
+            task.execute();
+        } catch (Exception e) {
+            handleExtractionError(e.toString());
+        }
     }
 
-    // @ReactMethod
-    // public void processVideo(String uri) {
-    //     Log.d("HeartRateMonitorModule", "processVideo(), uri="+ uri);
-    //     try {
-    //         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-    //         File path = new File(getExternalFilesDir(null), "HR_recording1.mp4");
-    //         Context context = getApplicationContext();
-    //         Log.d("HeartRateMonitorModule", "path="+ path);
-    //         Uri fileUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getApplicationContext().getPackageName()+".provider", path);
-    //         Log.d("HeartRateMonitorModule", "fileUri="+ fileUri);
-    //         retriever.setDataSource(uri);
-    //         String duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT);
-    //         int aduration = Integer.parseInt(duration);
+    // Helper method to handle errors and invoke the callback
+    private void handleExtractionError(String errorMessage) {
+        if (callback != null) {
+            callback.invoke(errorMessage, null);
+        }
+    }
 
-    //         int i = 10;
-    //         List<Bitmap> frameList = new ArrayList<>();
+    @ReactMethod
+    public void foo() {
+        String nana = Environment.getExternalStorageDirectory().getPath();
+        Log.d("HeartRateMonitorModule", "nana="+nana);
+    }
 
-    //         while (i < aduration) {
-    //             Bitmap bitmap = retriever.getFrameAtTime(i * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-    //             frameList.add(bitmap);
-    //             i += 5;
-    //         }
 
-    //         retriever.release();
+    private class ExtractFramesTask extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                // Move your existing code for frame extraction here
+                // ...
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 
-    //         long redBucket = 0;
-    //         long pixelCount = 0;
-    //         List<Long> a = new ArrayList<>();
+                
+                File destinationDir = new File(Environment.getExternalStorageDirectory().getPath());
+                // if (!destinationDir.exists()) {
+                //     destinationDir.mkdirs();
+                // }
+                Log.d("HeartRateMonitorModule","video directory exists");
 
-    //         Log.d("HeartRateMonitorModule", "doInBackground 2");
-    //         for (Bitmap frame : frameList) {
-    //             redBucket = 0;
-    //             for (int y = 550; y < 650; y++) {
-    //                 for (int x = 550; x < 650; x++) {
-    //                     int c = frame.getPixel(x, y);
-    //                     pixelCount++;
-    //                     redBucket += Color.red(c) + Color.blue(c) + Color.green(c);
-    //                 }
-    //             }
-    //             a.add(redBucket);
-    //         }
-    //         Log.d("HeartRateMonitorModule", "doInBackground 3");
+                // Specify the destination path for the copied video
+                File destinationFile = new File(destinationDir, "HeartRateTempVideo.mp4");
+                Log.d("HeartRateMonitorModule","video file exists");
 
-    //         List<Long> b = new ArrayList<>();
-    //         for (int j = 0; j < a.size() - 5; j++) {
-    //             long temp = (a.get(j) + a.get(j + 1) + a.get(j + 2) + a.get(j + 3) + a.get(j + 4)) / 4;
-    //             b.add(temp);
-    //         }
+                // // Copy the video from assets to the local directory
+                // AssetManager assetManager = reactContext.getAssets();
+                // InputStream inputStream = assetManager.open("HeartRateTempVideo.mp4");
+                // FileOutputStream outputStream = new FileOutputStream(destinationFile);
+                // byte[] buffer = new byte[1024];
+                // int read;
+                // while ((read = inputStream.read(buffer)) != -1) {
+                //     outputStream.write(buffer, 0, read);
+                // }
+                // inputStream.close();
+                // outputStream.close();
 
-    //         Log.d("HeartRateMonitorModule", "doInBackground 4");
 
-    //         long x = b.get(0);
-    //         int count = 0;
-    //         for (int j = 1; j < b.size(); j++) {
-    //             long p = b.get(j);
-    //             if ((p - x) > 3500) {
-    //                 count++;
-    //             }
-    //             x = b.get(j);
-    //         }
 
-    //         int rate = (int) ((count * 60.0f) / 90.0f);
-    //         Log.d("HeartRateMonitorModule", "rate="+rate);
+                retriever.setDataSource(destinationFile.getAbsolutePath());
 
-    //     } catch (Exception e) {
-    //         Log.d("HeartRateMonitorModule",  Log.getStackTraceString(e));
-    //     }
-    // }
+                Log.d("HeartRateMonitorModule","I reached here");
+                long duration = Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+                long frameTime = 1000; // Extract a frame every second (adjust as needed)
+                long currentTime = 0;
+                Log.d("HeartRateMonitorModule","Total duration of the video extracted in the helper code is = " + duration);
+
+                WritableArray frames = Arguments.createArray();
+//            List<Bitmap> frameList = new ArrayList<>();
+                long redBucket = 0;
+                long pixelCount = 0;
+                List<Long> a = new ArrayList<>();
+
+                while (currentTime < duration) {
+                    Bitmap frame = retriever.getFrameAtTime(currentTime * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+//                frameList.add(bitmap);
+                    redBucket = 0;
+
+                    if (frame != null) {
+                        //WritableMap frameInfo = Arguments.createMap();
+                        //frameInfo.putInt("width", frame.getWidth());
+                        //frameInfo.putInt("height", frame.getHeight());
+                        Log.d("HeartRateMonitorModule","I reached the frameInfo");
+                        Log.d("HeartRateMonitorModule","frame dimensions : width = " + frame.getWidth() + " and height = " + +frame.getHeight());
+                        // Iterate through each pixel in the frame and get its value
+                        //WritableArray pixels = Arguments.createArray();
+                        int width_starting_point = 0;
+                        int width_ending_point = frame.getWidth();
+                        int heigth_starting_point = 0;
+                        int height_ending_point = frame.getHeight();
+                        for (int x = width_starting_point; x < width_ending_point; x++) {
+                            for (int y = heigth_starting_point; y < height_ending_point; y++) {
+                                int pixelColor = frame.getPixel(x, y);
+                                //pixels.pushInt(pixelColor);
+                                pixelCount++;
+                                redBucket += Color.red(pixelColor) + Color.blue(pixelColor) + Color.green(pixelColor);
+                            }
+                        }
+
+                        //frameInfo.putArray("pixels", pixels);
+                        //frames.pushMap(frameInfo);
+                        a.add(redBucket);
+                    }
+
+                    currentTime += frameTime;
+                }
+                Log.d("HeartRateMonitorModule","I reached the end - part 1");
+                List<Long> b = new ArrayList<>();
+                for (int i = 0; i < a.size() - 5; i++) {
+                    long temp = (a.get(i) + a.get(i + 1) + a.get(i + 2) + a.get(i + 3) + a.get(i + 4)) / 4;
+                    b.add(temp);
+                }
+
+                long x = b.get(0);
+                int count = 0;
+
+                for (int i = 1; i < b.size() - 1; i++) {
+                    long p = b.get(i);
+                    if ((p - x) > 1000) {
+                        count++;
+                    }
+                    x = b.get(i);
+                }
+
+                int rate = (int) ((count * 60) / 81);
+
+                Log.d("HeartRateMonitorModule","I reached the end - part 2");
+                return String.valueOf(rate); // Replace 'result' with the actual result
+            } catch (Exception e) {
+                return e.toString();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            handleExtractionResult(result);
+        }
+
+        // Helper method to handle the extraction result and invoke the callback
+        private void handleExtractionResult(String result) {
+            if (callback != null) {
+                if (result != null) {
+                    callback.invoke(null, result);
+                } else {
+                    callback.invoke("Error", null);
+                }
+            }
+        }
+    }
 
 
 }

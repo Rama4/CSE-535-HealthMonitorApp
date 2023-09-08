@@ -141,3 +141,14 @@ run app in Production mode:
 
     1000ms has better accuracy
     100ms not good
+
+## Heart Rate Calculator - initial code
+
+    adding  FS package
+        import RNFS from 'react-native-fs';
+
+    The js moves the captured video to `/storage/emulated/0`.
+    The native module accesses the file from that location and computes the heart rate.
+
+    Successfully processes the video , but gives inaccurate heart rate.
+    Also noticed: upload signs button throws a "no table found" error when it is pressed.

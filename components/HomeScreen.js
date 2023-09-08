@@ -18,10 +18,6 @@ export default function HomeScreen({navigation}) {
     console.log('Symptoms button pressed');
     navigation.navigate('SymptomLogging');
   };
-  const onMeasureHeartRatePress = () => {
-    console.log('Measure Heart Rate button pressed');
-    // navigation.navigate('SymptomLogging');
-  };
   const onMeasureRespiratoryRatePress = () => {
     console.log('Measure Respiratory Rate button pressed');
     // navigation.navigate('SymptomLogging');
@@ -82,25 +78,18 @@ export default function HomeScreen({navigation}) {
         </View>
         <View style={styles.rowContainer}>
           <Button
-            title="Measure Heart Rate"
-            onPress={onMeasureHeartRatePress}
-          />
-        </View>
-        <View style={styles.rowContainer}>
-          <Button
             title="Measure Respiratory Rate"
-            onPress={onMeasureRespiratoryRatePress}
+            onPress={onRespRateSensorPress}
           />
         </View>
-        <View style={styles.rowContainer}>
+        {/* <View style={styles.rowContainer}>
           <Button title="create DB" onPress={onCreateDBPress} />
           <Button title="insert row" onPress={onInsertRowPress} />
         </View>
         <View style={styles.rowContainer}>
           <Button title="print table" onPress={onPrintTablePress} />
           <Button title="delete table" onPress={onDeleteTablePress} />
-        </View>
-        <Button title="RespRate Sensor" onPress={onRespRateSensorPress} />
+        </View> */}
       </View>
     </ScrollView>
   );
