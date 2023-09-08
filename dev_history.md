@@ -129,3 +129,7 @@ run app in Production mode:
 
     Basic functionality of Accelerometer is working.
     Code refactored, UI slightly improved..
+
+## Sample Native Module invocation working
+
+    able to invoke custom native module methods

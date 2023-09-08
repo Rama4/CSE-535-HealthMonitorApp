@@ -30,7 +30,7 @@ public class MainApplication extends Application implements ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // Adding react-native-sensors package link
           // Apparently not necessary, as it is linked already.
-          // packages.add(new RNSensorsPackage());
+           packages.add(new HeartRateMonitorPackage());
           return packages;
         }
 

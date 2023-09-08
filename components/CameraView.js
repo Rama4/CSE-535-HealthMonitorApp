@@ -1,7 +1,20 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {View, StyleSheet, Button, Text, Linking} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Button,
+  Text,
+  Linking,
+  NativeModules,
+  PermissionsAndroid,
+} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
-import {Camera, FlashMode, CameraType} from 'expo-camera';
+import {
+  Camera,
+  FlashMode,
+  CameraType,
+  requestCameraPermissionsAsync,
+} from 'expo-camera';
 import Video from 'react-native-video';
 
 const CAMERA_STATE = Object.freeze({
@@ -13,12 +26,14 @@ const CAMERA_STATE = Object.freeze({
 export default function CameraView({navigation}) {
   const [hasAudioPermission, setHasAudioPermission] = useState(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [hasFileSystemPermission, setHasFileSystemPermission] = useState(null);
   const [camera, setCamera] = useState(null);
   const [record, setRecord] = useState(null);
   const video = useRef(null);
   const [cameraState, setCameraState] = useState(CAMERA_STATE.active);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
 
+  const {HeartRateMonitorModule} = NativeModules;
   const isFocussed = useIsFocused();
 
   const [flashMode, setFlashMode] = React.useState(FlashMode.off);
@@ -35,19 +50,42 @@ export default function CameraView({navigation}) {
 
   useEffect(() => {
     async function getPermission() {
-      const cameraPermission = await Camera.requestCameraPermissionsAsync();
-      console.log('Camera permission status:', cameraPermission);
-      setHasCameraPermission(cameraPermission.status === 'granted');
-      if (cameraPermission === 'denied') await Linking.openSettings();
+      try {
+        const cameraPermission = await Camera.requestCameraPermissionsAsync();
+        console.log('Camera permission status:', cameraPermission);
+        setHasCameraPermission(cameraPermission.status === 'granted');
+        if (cameraPermission === 'denied') await Linking.openSettings();
 
-      const microphonePermission =
-        await Camera.requestMicrophonePermissionsAsync();
-      console.log('Microphone permission status:', microphonePermission);
-      setHasAudioPermission(microphonePermission.status === 'granted');
-      if (microphonePermission === 'denied') await Linking.openSettings();
+        const microphonePermission =
+          await Camera.requestMicrophonePermissionsAsync();
+        console.log('Microphone permission status:', microphonePermission);
+        setHasAudioPermission(microphonePermission.status === 'granted');
+        if (microphonePermission === 'denied') await Linking.openSettings();
+
+        const fileSystemPermission = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        ]);
+        console.log('File System permission status:', fileSystemPermission);
+        setHasFileSystemPermission(fileSystemPermission.status === 'granted');
+        if (fileSystemPermission === 'denied') await Linking.openSettings();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        HeartRateMonitorModule?.processVideo('test');
+      }
     }
+
     getPermission();
+    // requestStorageVideoPermissions();
+    HeartRateMonitorModule?.foo();
   }, []);
+
+  // const turnFlash = fm => {
+  //   if (flashMode !== fm) {
+  //     setFlashMode(fm);
+  //   }
+  // };
 
   const onRecordPress = async () => {
     console.log('onrecordPress: ', cameraState);
@@ -57,13 +95,28 @@ export default function CameraView({navigation}) {
 
         setCameraState(CAMERA_STATE.recording);
 
-        const data = await camera.recordAsync({
-          maxDuration: 45,
-        });
-        console.log('after recording done');
+        camera
+          .recordAsync({
+            maxDuration: 5,
+          })
+          .then(data => {
+            // console.log(JSON.stringify(data, null, 4));
+            console.log(data?.uri);
+            setRecord(data?.uri);
+            // console.log('after recording done');
 
-        setRecord(data.uri);
-        console.log(data.uri);
+            // HeartRateMonitorModule?.convertMediaUriToPath('adda');
+            // HeartRateMonitorModule?.processVideo(data.uri);
+            // let p = null;
+            // HeartRateMonitorModule.processVideo(data.uri);
+            // console.log(p);
+          })
+          .catch(e => console.error(e))
+          .finally(() => {
+            console.log('finally');
+            setFlashMode(FlashMode.off);
+            setCameraState(CAMERA_STATE.active);
+          });
       } else {
         setFlashMode(FlashMode.off);
         camera.stopRecording();
