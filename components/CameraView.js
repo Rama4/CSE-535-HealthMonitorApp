@@ -18,6 +18,9 @@ import {
 import Video from 'react-native-video';
 import RNFS from 'react-native-fs';
 
+import {useSelector, useDispatch} from 'react-redux';
+import {selectHeartRate, updateHeartRate} from './redux/slices/appSlice';
+
 const CAMERA_STATE = Object.freeze({
   active: 0,
   recording: 1,
@@ -27,6 +30,9 @@ const CAMERA_STATE = Object.freeze({
 const HeartRateMonitorTimeLimitSecs = 5;
 
 export default function CameraView({navigation}) {
+  const dispatch = useDispatch();
+  const _heartRate = useSelector(selectHeartRate);
+
   const [hasAudioPermission, setHasAudioPermission] = useState(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [hasFileSystemPermission, setHasFileSystemPermission] = useState(null);
@@ -42,6 +48,10 @@ export default function CameraView({navigation}) {
   const isFocussed = useIsFocused();
 
   const [flashMode, setFlashMode] = React.useState(FlashMode.off);
+
+  useEffect(() => {
+    console.log('_heartRate = ', _heartRate);
+  }, [_heartRate]);
 
   const __handleFlashMode = () => {
     if (flashMode === FlashMode.on) {
@@ -140,6 +150,7 @@ export default function CameraView({navigation}) {
                 console.log('Video saved at:', videoPath);
                 HeartRateMonitorModule.extractFrames((res, rate) => {
                   setHeartRate(rate);
+                  dispatch(updateHeartRate(rate));
                   setMessage(`Your Heart Rate is: ${rate} bpm`);
                   console.log(
                     'HeartRateMonitorModule.extractFrames:rate=',

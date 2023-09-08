@@ -12,10 +12,15 @@ import {
 } from '../services/data-service';
 import Button from './Button';
 
+import {useSelector, useDispatch} from 'react-redux';
+import {selectSymptoms, setSymptomVal} from './redux/slices/appSlice';
+
 export default function SymptomLoggingScreen() {
+  const dispatch = useDispatch();
   const [symptomValues, setSymptomValues] = useState(
     new Array(SymptomList.length).fill(0),
   );
+  const symptomsVal = useSelector(selectSymptoms);
   const [selectedSymptom, setSelectedSymptom] = useState(-1);
   const starRating = selectedSymptom >= 0 ? symptomValues[selectedSymptom] : 0;
 
@@ -30,6 +35,9 @@ export default function SymptomLoggingScreen() {
     console.log('symptomValues = ', symptomValues);
     console.log('starRating=', starRating);
   }, [symptomValues]);
+  useEffect(() => {
+    console.log('symptomsVal = ', symptomsVal);
+  }, [symptomsVal]);
 
   const onUploadSymptomsPress = useCallback(async () => {
     try {
@@ -67,6 +75,8 @@ export default function SymptomLoggingScreen() {
   const onSetStarRating = val => {
     // setRating(val);
     console.log(`onSetStarRating: ${val}`);
+    dispatch(setSymptomVal({index: selectedSymptom, value: val}));
+
     setSymptomValues(_symptomValues => {
       let symptoms = [..._symptomValues];
       symptoms[selectedSymptom] = val;

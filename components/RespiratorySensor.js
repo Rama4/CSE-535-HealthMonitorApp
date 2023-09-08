@@ -8,7 +8,10 @@ import {
 import {pairwise, startWith, skip} from 'rxjs/operators';
 import Button from './Button';
 
-const MeasuringIntervalSeconds = 15;
+import {useSelector, useDispatch} from 'react-redux';
+import {selectRespRate, setRespRate} from './redux/slices/appSlice';
+
+const MeasuringIntervalSeconds = 5;
 const AccelerometerUpdateIntervalMS = 900;
 const RespiratoryMeasurementThreshold = 0.15;
 const NumReadingsSkip = 1000 / AccelerometerUpdateIntervalMS;
@@ -19,6 +22,9 @@ setUpdateIntervalForType(
 );
 
 export default function RespiratorySensor() {
+  const dispatch = useDispatch();
+  const _respRate = useSelector(selectRespRate);
+
   [x, setX] = useState(0);
   [y, setY] = useState(0);
   [z, setZ] = useState(0);
@@ -34,7 +40,12 @@ export default function RespiratorySensor() {
     console.log('respRate=', respRate);
     respRate = respRate / MeasuringIntervalSeconds;
     console.log('respRate=', respRate);
+    dispatch(setRespRate(respRate));
   }, []);
+
+  useEffect(() => {
+    console.log('_respRate = ', _respRate);
+  }, [_respRate]);
 
   const _getSubscription = useCallback(() => {
     return accelerometer

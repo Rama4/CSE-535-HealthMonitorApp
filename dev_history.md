@@ -152,3 +152,10 @@ run app in Production mode:
 
     Successfully processes the video , but gives inaccurate heart rate.
     Also noticed: upload signs button throws a "no table found" error when it is pressed.
+
+## Add redux read/update functionality - complete
+
+        yarn add react-redux redux redux-thunk @reduxjs/toolkit
+
+        configured Redux, all update actions working.
+        symptoms array index update working.
