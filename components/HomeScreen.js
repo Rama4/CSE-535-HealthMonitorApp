@@ -7,13 +7,10 @@ import {
   insertRow,
   printTable,
   deleteTable,
-} from '../services/data-service';
+} from '../services/useDataService';
 import Button from './Button';
 
 export default function HomeScreen({navigation}) {
-  const onUploadSignsPress = () => {
-    console.log('upload signs button pressed');
-  };
   const onSymptomsPress = () => {
     console.log('Symptoms button pressed');
     navigation.navigate('SymptomLogging');
@@ -69,20 +66,21 @@ export default function HomeScreen({navigation}) {
   };
 
   return (
-    <ScrollView>
-      <View style={styles.view}>
-        <CameraView />
-        <View style={styles.rowContainer}>
-          <Button title="Symptoms" onPress={onSymptomsPress} />
-          <Button title="Upload Signs" onPress={onUploadSignsPress} />
-        </View>
+    <View style={styles.view}>
+      <CameraView />
+      <View style={styles.homeButtonsContainer}>
         <View style={styles.rowContainer}>
           <Button
             title="Measure Respiratory Rate"
             onPress={onRespRateSensorPress}
           />
         </View>
-        {/* <View style={styles.rowContainer}>
+        <View style={styles.rowContainer}>
+          <Button title="Log symptoms" onPress={onSymptomsPress} />
+          {/* <Button title="Upload Signs" onPress={onUploadSignsPress} /> */}
+        </View>
+      </View>
+      {/* <View style={styles.rowContainer}>
           <Button title="create DB" onPress={onCreateDBPress} />
           <Button title="insert row" onPress={onInsertRowPress} />
         </View>
@@ -90,26 +88,35 @@ export default function HomeScreen({navigation}) {
           <Button title="print table" onPress={onPrintTablePress} />
           <Button title="delete table" onPress={onDeleteTablePress} />
         </View> */}
-      </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  view: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    // backgroundColor: 'yellow',
+    // height: '100%',
+    // minHeight: '100%',
+  },
+  homeButtonsContainer: {
+    // backgroundColor: 'red',
+    marginBottom: 20,
+  },
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: '#fff',
-  },
-  view: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    // backgroundColor: '#fff',
   },
   rowContainer: {
     // flex: 1,
+    // width
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginVertical: 15,
   },
 });

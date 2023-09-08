@@ -2,15 +2,8 @@ import {useCallback, useState, useEffect} from 'react';
 import {View, Text, FlatList, StyleSheet, Pressable} from 'react-native';
 import {SymptomList} from '../utils/symptomConstants';
 import StarRating from './StarRating';
-import {
-  getDBConnection,
-  createTable,
-  insertRow,
-  printTable,
-  deleteTable,
-  TableName,
-} from '../services/data-service';
 import Button from './Button';
+import useDataService, {TableName} from '../services/useDataService';
 
 import {useSelector, useDispatch} from 'react-redux';
 import {selectSymptoms, setSymptomVal} from './redux/slices/appSlice';
@@ -21,8 +14,9 @@ export default function SymptomLoggingScreen() {
     new Array(SymptomList.length).fill(0),
   );
   const symptomsVal = useSelector(selectSymptoms);
+  const {getDBConnection, insertRow, printTable} = useDataService();
   const [selectedSymptom, setSelectedSymptom] = useState(-1);
-  const starRating = selectedSymptom >= 0 ? symptomValues[selectedSymptom] : 0;
+  const starRating = selectedSymptom >= 0 ? symptomsVal[selectedSymptom] : 0;
 
   useEffect(() => {
     console.log(
@@ -43,8 +37,9 @@ export default function SymptomLoggingScreen() {
     try {
       const db = await getDBConnection();
       console.log(symptomValues);
-      await insertRow(db, TableName, symptomValues);
+      await insertRow(db, TableName);
       console.log('added values into table..');
+      await printTable(db, TableName);
     } catch (error) {
       console.error(error);
     }
@@ -147,6 +142,7 @@ const styles = StyleSheet.create({
   },
   symptomListButton: {
     backgroundColor: 'lightgray',
+    height: 50,
   },
   separator: {
     borderBottomColor: 'gray',

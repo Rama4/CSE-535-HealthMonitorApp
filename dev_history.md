@@ -159,3 +159,8 @@ run app in Production mode:
 
         configured Redux, all update actions working.
         symptoms array index update working.
+
+# Make UI look better, sync all values with redux and use it when inserting row into DB,
+
+    insert row and print table functionality working, takes values from redux store.
+    redux connection is working for all screens.

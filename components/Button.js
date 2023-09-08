@@ -2,15 +2,26 @@ import React from 'react';
 import {Text, StyleSheet, Pressable} from 'react-native';
 
 export default function Button(props) {
-  const {onPress, title = 'Save'} = props;
   return (
-    <Pressable style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{title}</Text>
+    <Pressable
+      style={[styles.button, props.disabled ? styles.disabledButton : null]}
+      onPress={props?.onPress}
+      {...props}>
+      <Text style={[styles.text, props.disabled ? styles.disabledText : null]}>
+        {props?.title ?? 'click me'}
+      </Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  disabledButton: {
+    backgroundColor: 'gray',
+    color: '#777',
+  },
+  disabledText: {
+    color: 'lightgray',
+  },
   button: {
     alignItems: 'center',
     justifyContent: 'center',
