@@ -164,3 +164,9 @@ run app in Production mode:
 
     insert row and print table functionality working, takes values from redux store.
     redux connection is working for all screens.
+
+# Display DB table in seperate Screen
+
+    guide: https://www.waldo.com/blog/react-native-table
+
+        yarn add react-native-table-component

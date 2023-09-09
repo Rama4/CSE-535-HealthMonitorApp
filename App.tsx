@@ -6,6 +6,7 @@ import SymptomLoggingScreen from './components/SymptomLoggingScreen';
 import RespiratorySensor from './components/RespiratorySensor';
 import {Provider} from 'react-redux';
 import {store} from './components/redux/store';
+import History from './components/History';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,13 @@ export default function App() {
             component={RespiratorySensor}
             options={{
               title: 'Respiratory Rate Sensor',
+            }}
+          />
+          <Stack.Screen
+            name="History"
+            component={History}
+            options={{
+              title: 'Symptom History',
             }}
           />
         </Stack.Navigator>

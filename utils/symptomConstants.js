@@ -10,6 +10,11 @@ export const SymptomList = [
   'Shortness of Breath',
   'Feeling tired',
 ];
+export const HealthDataTableColumns = [
+  'Heart Rate',
+  'Respiratory Rate',
+  ...SymptomList,
+];
 
 export const CreateTableQuery2 = `create table if not EXISTS healthdata ( 
   heartrate real not null, 

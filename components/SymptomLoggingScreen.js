@@ -14,7 +14,8 @@ export default function SymptomLoggingScreen() {
     new Array(SymptomList.length).fill(0),
   );
   const symptomsVal = useSelector(selectSymptoms);
-  const {getDBConnection, insertRow, printTable} = useDataService();
+  const {getDBConnection, createTable, insertRow, printTable} =
+    useDataService();
   const [selectedSymptom, setSelectedSymptom] = useState(-1);
   const starRating = selectedSymptom >= 0 ? symptomsVal[selectedSymptom] : 0;
 
@@ -36,7 +37,8 @@ export default function SymptomLoggingScreen() {
   const onUploadSymptomsPress = useCallback(async () => {
     try {
       const db = await getDBConnection();
-      console.log(symptomValues);
+      await createTable(db);
+      // console.log(symptomValues);
       await insertRow(db, TableName);
       console.log('added values into table..');
       await printTable(db, TableName);

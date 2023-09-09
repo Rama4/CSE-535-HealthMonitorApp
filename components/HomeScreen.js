@@ -65,6 +65,31 @@ export default function HomeScreen({navigation}) {
     navigation.navigate('RespiratorySensor');
   };
 
+  const onHistoryPress = () => {
+    navigation.navigate('History');
+  };
+
+  const renderTableOperationButtons = () => {
+    return (
+      <>
+        <View style={styles.rowContainer}>
+          <Button title="See Symptom History" onPress={onHistoryPress} />
+        </View>
+      </>
+    );
+
+    {
+      /* <View style={styles.rowContainer}>
+          <Button title="create DB" onPress={onCreateDBPress} />
+          <Button title="insert row" onPress={onInsertRowPress} />
+        </View>
+        <View style={styles.rowContainer}>
+          <Button title="print table" onPress={onPrintTablePress} />
+          <Button title="delete table" onPress={onDeleteTablePress} />
+        </View> */
+    }
+  };
+
   return (
     <View style={styles.view}>
       <CameraView />
@@ -80,14 +105,7 @@ export default function HomeScreen({navigation}) {
           {/* <Button title="Upload Signs" onPress={onUploadSignsPress} /> */}
         </View>
       </View>
-      {/* <View style={styles.rowContainer}>
-          <Button title="create DB" onPress={onCreateDBPress} />
-          <Button title="insert row" onPress={onInsertRowPress} />
-        </View>
-        <View style={styles.rowContainer}>
-          <Button title="print table" onPress={onPrintTablePress} />
-          <Button title="delete table" onPress={onDeleteTablePress} />
-        </View> */}
+      {renderTableOperationButtons()}
     </View>
   );
 }

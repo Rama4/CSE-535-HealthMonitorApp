@@ -61,9 +61,11 @@ export default function useDataService() {
       });
       console.log('printing table:', tableName);
       console.log(JSON.stringify(todoItems, null, 4));
-      return results;
+      console.log('print table result:', results);
+      return todoItems;
     } catch (error) {
       console.error(error);
+      return null;
       // throw Error('Failed to get todoItems !!!');
     }
   };
@@ -82,10 +84,11 @@ export default function useDataService() {
           todoItems.push(result.rows.item(index));
         }
       });
-      console.log(JSON.stringify(todoItems, null, 4));
+      console.log('insertRow result:', results);
       return results;
     } catch (error) {
       console.error(error);
+      return null;
       // throw Error('Failed to get todoItems !!!');
     }
   };
