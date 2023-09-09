@@ -1,5 +1,5 @@
 import {useCallback} from 'react';
-import {View, StyleSheet, ScrollView} from 'react-native';
+import {View, StyleSheet, ScrollView, Text} from 'react-native';
 import CameraView from './CameraView';
 import {
   getDBConnection,
@@ -92,6 +92,10 @@ export default function HomeScreen({navigation}) {
 
   return (
     <View style={styles.view}>
+      <Text style={styles.text}>
+        Please Measure the heart rate, Respiratory Rate and then log the
+        Symptoms.
+      </Text>
       <CameraView />
       <View style={styles.homeButtonsContainer}>
         <View style={styles.rowContainer}>
@@ -104,8 +108,8 @@ export default function HomeScreen({navigation}) {
           <Button title="Log symptoms" onPress={onSymptomsPress} />
           {/* <Button title="Upload Signs" onPress={onUploadSignsPress} /> */}
         </View>
+        {renderHistoryButton()}
       </View>
-      {renderHistoryButton()}
     </View>
   );
 }
@@ -122,8 +126,9 @@ const styles = StyleSheet.create({
     // minHeight: '100%',
   },
   homeButtonsContainer: {
+    flex: 1,
     // backgroundColor: 'red',
-    marginBottom: 20,
+    marginTop: 15,
   },
   container: {
     flex: 1,
@@ -135,6 +140,10 @@ const styles = StyleSheet.create({
     // width
     flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: 15,
+    marginBottom: 15,
+  },
+  text: {
+    fontSize: 24,
+    // color: 'white',
   },
 });

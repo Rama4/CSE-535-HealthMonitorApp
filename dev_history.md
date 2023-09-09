@@ -185,3 +185,16 @@ run app in Production mode:
     Disabled Upload symptoms button if heart rate or resp rate is null.
 
     release apk works fine. DB operations work fine.
+
+# toast messages and UX improvements
+
+    https://www.npmjs.com/package/react-native-toast-message
+
+        react-native-toast-message
+
+    show toast upon upload symptoms button press.
+
+    table styled
+    symptom list styled
+    Home screen:
+        show camera -> measure heart rate (button disabled until calculation over).

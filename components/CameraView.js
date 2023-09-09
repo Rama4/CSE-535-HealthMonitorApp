@@ -37,6 +37,7 @@ export default function CameraView({navigation}) {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [hasFileSystemPermission, setHasFileSystemPermission] = useState(null);
   const [camera, setCamera] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
   const [record, setRecord] = useState(null);
   const [cameraState, setCameraState] = useState(CAMERA_STATE.active);
   const [cameraBtnDisabled, setCameraBtnDisabled] = useState(false);
@@ -120,6 +121,9 @@ export default function CameraView({navigation}) {
 
   const onRecordPress = async () => {
     console.log('onrecordPress: ', cameraState);
+    if (!showCamera) {
+      setShowCamera(true);
+    }
     if (camera) {
       if (cameraState === CAMERA_STATE.active) {
         setFlashMode(FlashMode.torch);
@@ -174,11 +178,13 @@ export default function CameraView({navigation}) {
             console.log('finally');
             setFlashMode(FlashMode.off);
             setCameraState(CAMERA_STATE.active);
+            setShowCamera(false);
             // if (!cameraBtnDisabled) setCameraBtnDisabled(false);
           });
       } else {
         setFlashMode(FlashMode.off);
         camera.stopRecording();
+        setShowCamera(false);
         setCameraState(CAMERA_STATE.active);
         // setCameraBtnDisabled(false);
         console.log('after setting state:', cameraState);
@@ -231,7 +237,7 @@ export default function CameraView({navigation}) {
     <View style={styles.containerView}>
       <View style={styles.cameraVideoContainer}>
         <View style={styles.cameraContainer}>
-          {isFocussed && (
+          {isFocussed && showCamera && (
             <Camera
               flashMode={flashMode}
               ref={ref => setCamera(ref)}
@@ -249,7 +255,9 @@ export default function CameraView({navigation}) {
       <View style={styles.buttonsContainer}>
         <Button
           title={
-            cameraState === CAMERA_STATE.active
+            !showCamera
+              ? 'Show Camera'
+              : cameraState === CAMERA_STATE.active
               ? 'Measure Heart Rate'
               : 'Stop Recording'
           }

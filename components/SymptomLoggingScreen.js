@@ -1,5 +1,12 @@
 import {useCallback, useState, useEffect} from 'react';
-import {View, Text, FlatList, StyleSheet, Pressable} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Pressable,
+  ToastAndroid,
+} from 'react-native';
 import {SymptomList} from '../utils/symptomConstants';
 import StarRating from './StarRating';
 import Button from './Button';
@@ -43,13 +50,27 @@ export default function SymptomLoggingScreen() {
     console.log('symptomsVal = ', symptomsVal);
   }, [symptomsVal]);
 
+  const showToast = (success = false) => {
+    ToastAndroid.show(
+      success
+        ? 'Successfully inserted the values into the table!'
+        : 'Failed to insert the values into the table!',
+      ToastAndroid.SHORT,
+    );
+  };
+
   const onUploadSymptomsPress = useCallback(async () => {
     try {
       const db = await getDBConnection();
       await createTable(db);
       // console.log(symptomValues);
-      await insertRow(db, TableName);
+      const insertRowResult = await insertRow(db, TableName);
       console.log('added values into table..');
+      if (insertRowResult) {
+        showToast(true);
+      } else {
+        showToast();
+      }
       await printTable(db, TableName);
     } catch (error) {
       console.error(error);
@@ -67,16 +88,23 @@ export default function SymptomLoggingScreen() {
     // setRating(symptomValues[index]);
   };
 
-  const renderSymptomListItem = ({item, index}) => {
-    return (
-      <Pressable
-        style={styles.symptomListButton}
-        key={index}
-        onPress={() => onSymptomPress(index)}>
-        <Text style={styles.text}>{item}</Text>
-      </Pressable>
-    );
-  };
+  const renderSymptomListItem = useCallback(
+    ({item, index}) => {
+      return (
+        <Pressable
+          style={
+            index !== selectedSymptom
+              ? styles.symptomListButton
+              : styles.symptomListButtonSelected
+          }
+          key={index}
+          onPress={() => onSymptomPress(index)}>
+          <Text style={styles.text}>{item}</Text>
+        </Pressable>
+      );
+    },
+    [selectedSymptom],
+  );
 
   const onSetStarRating = val => {
     // setRating(val);
@@ -142,7 +170,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 24,
-    // color: 'white',
+    color: 'black',
   },
   listContainer: {
     flex: 1,
@@ -156,7 +184,12 @@ const styles = StyleSheet.create({
     maxHeight: '40%',
   },
   symptomListButton: {
-    backgroundColor: 'lightgray',
+    backgroundColor: '#eee',
+    height: 50,
+  },
+  symptomListButtonSelected: {
+    backgroundColor: '#777',
+    color: 'white',
     height: 50,
   },
   separator: {
