@@ -30,6 +30,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
+
 
 import android.content.Context;
 
@@ -55,10 +57,10 @@ public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void extractFrames(final Callback callback) {
+    public void extractFrames(int threshold, int duration, int frameTime, int heightStart, int heightEnd, int widthStart, int widthEnd, final Callback callback) {
         this.callback = callback;
         try {
-            ExtractFramesTask task = new ExtractFramesTask();
+            ExtractFramesTask task = new ExtractFramesTask(threshold, duration, frameTime, heightStart, heightEnd, widthStart, widthEnd);
             task.execute();
         } catch (Exception e) {
             handleExtractionError(e.toString());
@@ -80,6 +82,30 @@ public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
 
 
     private class ExtractFramesTask extends AsyncTask<Void, Void, String> {
+        private int Duration, Threshold, FrameTime, heightStart, heightEnd, widthStart, widthEnd;
+        ExtractFramesTask() {
+            super();
+            this.Duration = 15;
+            this.Threshold = 1000;
+            this.FrameTime = 1000;
+            this.heightStart = 210;
+            this.heightEnd = 510;
+            this.widthStart = 140;
+            this.widthEnd= 340;
+        }
+
+
+        ExtractFramesTask(int threshold, int duration, int frameTime, int heightStart, int heightEnd, int widthStart, int widthEnd) {
+            super();
+            this.Duration = duration;
+            this.Threshold = threshold;
+            this.FrameTime = frameTime;
+            this.heightStart = heightStart;
+            this.heightEnd = heightEnd;
+            this.widthStart = widthStart;
+            this.widthEnd = widthEnd;
+        }
+
         @Override
         protected String doInBackground(Void... params) {
             try {
@@ -93,6 +119,8 @@ public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
                 //     destinationDir.mkdirs();
                 // }
                 Log.d("HeartRateMonitorModule","video directory exists");
+                Log.d("HeartRateMonitorModule","threshold="+this.Threshold);
+                Log.d("HeartRateMonitorModule","duration="+this.Duration);
 
                 // Specify the destination path for the copied video
                 File destinationFile = new File(destinationDir, "HeartRateTempVideo.mp4");
@@ -116,7 +144,6 @@ public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
 
                 Log.d("HeartRateMonitorModule","I reached here");
                 long duration = Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-                long frameTime = 1000; // Extract a frame every second (adjust as needed)
                 long currentTime = 0;
                 Log.d("HeartRateMonitorModule","Total duration of the video extracted in the helper code is = " + duration);
 
@@ -139,16 +166,12 @@ public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
                         Log.d("HeartRateMonitorModule","frame dimensions : width = " + frame.getWidth() + " and height = " + +frame.getHeight());
                         // Iterate through each pixel in the frame and get its value
                         //WritableArray pixels = Arguments.createArray();
-                        int width_starting_point = 0;
-                        int width_ending_point = frame.getWidth();
-                        int heigth_starting_point = 0;
-                        int height_ending_point = frame.getHeight();
-                        for (int x = width_starting_point; x < width_ending_point; x++) {
-                            for (int y = heigth_starting_point; y < height_ending_point; y++) {
+                        for (int x = this.widthStart; x < this.widthEnd; x++) {
+                            for (int y = this.heightStart; y < this.heightEnd; y++) {
                                 int pixelColor = frame.getPixel(x, y);
                                 //pixels.pushInt(pixelColor);
                                 pixelCount++;
-                                redBucket += Color.red(pixelColor) + Color.blue(pixelColor) + Color.green(pixelColor);
+                                redBucket += Color.red(pixelColor);
                             }
                         }
 
@@ -157,27 +180,33 @@ public class HeartRateMonitorModule extends ReactContextBaseJavaModule {
                         a.add(redBucket);
                     }
 
-                    currentTime += frameTime;
+                    currentTime += this.FrameTime;
                 }
                 Log.d("HeartRateMonitorModule","I reached the end - part 1");
                 List<Long> b = new ArrayList<>();
                 for (int i = 0; i < a.size() - 5; i++) {
-                    long temp = (a.get(i) + a.get(i + 1) + a.get(i + 2) + a.get(i + 3) + a.get(i + 4)) / 4;
+                    long temp = (a.get(i) + a.get(i + 1) + a.get(i + 2) + a.get(i + 3) + a.get(i + 4)) / 5;
                     b.add(temp);
+                    Log.d("HeartRateMonitorModule","adding temp :"+ temp +" to b");
                 }
 
                 long x = b.get(0);
                 int count = 0;
+                Log.d("HeartRateMonitorModule","x="+x);
+                Log.d("HeartRateMonitorModule","b.size()="+b.size());
 
                 for (int i = 1; i < b.size() - 1; i++) {
                     long p = b.get(i);
-                    if ((p - x) > 1000) {
+                    long dif = Math.abs(p-x);
+                    Log.d("HeartRateMonitorModule","p-x=" + dif);
+                    Log.d("HeartRateMonitorModule","threshold=" + this.Threshold);
+                    if (Math.abs(p-x) > this.Threshold) {
                         count++;
                     }
                     x = b.get(i);
                 }
 
-                int rate = (int) ((count * 60) / 81);
+                int rate = (int) ((count * 60) / this.Duration);
 
                 Log.d("HeartRateMonitorModule","I reached the end - part 2");
                 return String.valueOf(rate); // Replace 'result' with the actual result

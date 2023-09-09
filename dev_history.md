@@ -198,3 +198,9 @@ run app in Production mode:
     symptom list styled
     Home screen:
         show camera -> measure heart rate (button disabled until calculation over).
+
+# Heart rate calculation faster and more accurate
+
+    reduce camera video record quality
+    bring all constants of HeartRate monitor algorithm from native to js side for faster testing of values.
+    message for user to view table contents from the "See symptom history" button in home screen.

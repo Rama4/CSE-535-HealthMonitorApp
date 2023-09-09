@@ -50,6 +50,9 @@ export default function SymptomLoggingScreen() {
     console.log('symptomsVal = ', symptomsVal);
   }, [symptomsVal]);
 
+  const message =
+    'You can view the table values by pressing on "See symptom data history" in Home screen.';
+
   const showToast = (success = false) => {
     ToastAndroid.show(
       success
@@ -153,6 +156,7 @@ export default function SymptomLoggingScreen() {
         Select symptom from the list and select a rating for it:
       </Text>
       {renderSymptomList()}
+      <Text style={styles.messageText}>{message}</Text>
       <Button
         title="Upload Symptoms"
         onPress={onUploadSymptomsPress}
@@ -171,6 +175,10 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 24,
     color: 'black',
+  },
+  messageText: {
+    fontSize: 16,
+    marginBottom: 16,
   },
   listContainer: {
     flex: 1,

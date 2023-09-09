@@ -13,6 +13,7 @@ import {
   FlashMode,
   CameraType,
   requestCameraPermissionsAsync,
+  VideoQuality,
 } from 'expo-camera';
 // import Video from 'react-native-video';
 import RNFS from 'react-native-fs';
@@ -27,7 +28,18 @@ const CAMERA_STATE = Object.freeze({
   paused: 2,
 });
 
-const HeartRateMonitorTimeLimitSecs = 5;
+const VideoDurationSec = 45;
+const HeartRateCalcThreshold = 1000;
+const FrameTime = 750;
+const HeightStart = 210;
+const HeightEnd = 510;
+const WidthStart = 140;
+const WidthEnd = 340;
+
+const CameraVideoRecordConfig = {
+  maxDuration: VideoDurationSec,
+  quality: VideoQuality['480p'],
+};
 
 export default function CameraView({navigation}) {
   const dispatch = useDispatch();
@@ -41,8 +53,7 @@ export default function CameraView({navigation}) {
   const [record, setRecord] = useState(null);
   const [cameraState, setCameraState] = useState(CAMERA_STATE.active);
   const [cameraBtnDisabled, setCameraBtnDisabled] = useState(false);
-  // const video = useRef(null);
-  // const [isVideoPaused, setIsVideoPaused] = useState(false);
+
   const [heartRate, setHeartRate] = useState(null);
   const [message, setMessage] = useState(
     'To measure heart rate, softly press your index finger on the camera lens while covering the flash light, and press the "Measure Heart rate" button',
@@ -52,6 +63,9 @@ export default function CameraView({navigation}) {
   const isFocussed = useIsFocused();
 
   const [flashMode, setFlashMode] = React.useState(FlashMode.off);
+
+  // const video = useRef(null);
+  // const [isVideoPaused, setIsVideoPaused] = useState(false);
 
   useEffect(() => {
     console.log('_heartRate = ', _heartRate);
@@ -90,34 +104,17 @@ export default function CameraView({navigation}) {
         if (fileSystemPermission === 'denied') await Linking.openSettings();
       } catch (e) {
         console.error(e);
-      } finally {
-        // HeartRateMonitorModule?.processVideo('test');
       }
     }
 
     getPermission();
     const videoPath =
       RNFS.ExternalStorageDirectoryPath + '/HeartRateTempVideo.mp4';
-
-    // RNFS.exists(videoPath)
-    //   .then(exist => console.log('video path path exist:', exist))
-    //   .catch(e => console.error(e));
-    // HeartRateMonitorModule.foo();
-
-    // RNFS.exists('android/app/src/main/assets').then(exist => console.log('file path exist:',exist)).catch(e=>console.error(e));
-    // requestStorageVideoPermissions();
-    // HeartRateMonitorModule?.foo();
   }, []);
 
   useEffect(() => {
     console.log('heartRate=', heartRate);
   }, [heartRate]);
-
-  // const turnFlash = fm => {
-  //   if (flashMode !== fm) {
-  //     setFlashMode(fm);
-  //   }
-  // };
 
   const onRecordPress = async () => {
     console.log('onrecordPress: ', cameraState);
@@ -133,21 +130,12 @@ export default function CameraView({navigation}) {
 
         setMessage('Now recording heart rate');
         camera
-          .recordAsync({
-            maxDuration: HeartRateMonitorTimeLimitSecs,
-          })
+          .recordAsync(CameraVideoRecordConfig)
           .then(data => {
-            // console.log(JSON.stringify(data, null, 4));
             console.log(data?.uri);
             setRecord(data?.uri);
             setMessage('Recorded heart rate, processing...');
-            // console.log('after recording done');
 
-            // HeartRateMonitorModule?.convertMediaUriToPath('adda');
-            // HeartRateMonitorModule?.processVideo(data.uri);
-            // let p = null;
-            // HeartRateMonitorModule.processVideo(data.uri);
-            // console.log(p);
             const videoPath =
               RNFS.ExternalStorageDirectoryPath + '/HeartRateTempVideo.mp4';
             RNFS.moveFile(data.uri, videoPath)
@@ -156,18 +144,27 @@ export default function CameraView({navigation}) {
               .finally(() => {
                 // Now 'videoPath' contains the path to the saved video
                 console.log('Video saved at:', videoPath);
-                HeartRateMonitorModule.extractFrames((res, rate) => {
-                  setCameraBtnDisabled(false);
-                  setHeartRate(rate);
-                  dispatch(updateHeartRate(rate));
-                  setMessage(`Your Heart Rate is: ${rate} bpm`);
-                  console.log(
-                    'HeartRateMonitorModule.extractFrames:rate=',
-                    rate,
-                    'result = ',
-                    res,
-                  );
-                });
+                HeartRateMonitorModule.extractFrames(
+                  HeartRateCalcThreshold,
+                  VideoDurationSec,
+                  FrameTime,
+                  HeightStart,
+                  HeightEnd,
+                  WidthStart,
+                  WidthEnd,
+                  (res, rate) => {
+                    setCameraBtnDisabled(false);
+                    setHeartRate(rate);
+                    dispatch(updateHeartRate(rate));
+                    setMessage(`Your Heart Rate is: ${rate} bpm`);
+                    console.log(
+                      'HeartRateMonitorModule.extractFrames:rate=',
+                      rate,
+                      'result = ',
+                      res,
+                    );
+                  },
+                );
               });
           })
           .catch(e => {

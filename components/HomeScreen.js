@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   text: {
-    fontSize: 24,
+    fontSize: 20,
     // color: 'white',
   },
 });
