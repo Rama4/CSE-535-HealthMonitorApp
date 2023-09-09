@@ -10,6 +10,11 @@ import History from './components/History';
 
 const Stack = createNativeStackNavigator();
 
+// if (process.env.NODE_ENV === 'production') {
+//   console.log = function no_console() {};
+//   console.error = function no_console_err() {};
+// }
+
 export default function App() {
   return (
     <Provider store={store}>
@@ -34,7 +39,7 @@ export default function App() {
             name="History"
             component={History}
             options={{
-              title: 'Symptom History',
+              title: 'Symptom data history',
             }}
           />
         </Stack.Navigator>

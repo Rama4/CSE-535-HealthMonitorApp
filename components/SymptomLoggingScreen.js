@@ -6,7 +6,12 @@ import Button from './Button';
 import useDataService, {TableName} from '../services/useDataService';
 
 import {useSelector, useDispatch} from 'react-redux';
-import {selectSymptoms, setSymptomVal} from './redux/slices/appSlice';
+import {
+  selectHeartRate,
+  selectRespRate,
+  selectSymptoms,
+  setSymptomVal,
+} from './redux/slices/appSlice';
 
 export default function SymptomLoggingScreen() {
   const dispatch = useDispatch();
@@ -14,6 +19,10 @@ export default function SymptomLoggingScreen() {
     new Array(SymptomList.length).fill(0),
   );
   const symptomsVal = useSelector(selectSymptoms);
+  const _heartRate = useSelector(selectHeartRate);
+  const _respRate = useSelector(selectRespRate);
+  const isUploadBtnDisabled = !_heartRate || !_respRate;
+
   const {getDBConnection, createTable, insertRow, printTable} =
     useDataService();
   const [selectedSymptom, setSelectedSymptom] = useState(-1);
@@ -116,7 +125,11 @@ export default function SymptomLoggingScreen() {
         Select symptom from the list and select a rating for it:
       </Text>
       {renderSymptomList()}
-      <Button title="Upload Symptoms" onPress={onUploadSymptomsPress} />
+      <Button
+        title="Upload Symptoms"
+        onPress={onUploadSymptomsPress}
+        disabled={isUploadBtnDisabled}
+      />
     </View>
   );
 }

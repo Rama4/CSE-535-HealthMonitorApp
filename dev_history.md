@@ -170,3 +170,18 @@ run app in Production mode:
     guide: https://www.waldo.com/blog/react-native-table
 
         yarn add react-native-table-component
+
+# release apk for testing on device
+
+    generated a keytool file inside OpenJdK's java path (found using "which java" command), used it to generate a keystore file
+
+
+
+        cd "C:\Program Files\OpenJDK\openjdk-11.0.15_10\bin\"
+
+
+        keytool -genkeypair -v -storetype PKCS12 -keystore my-upload-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+
+    Disabled Upload symptoms button if heart rate or resp rate is null.
+
+    release apk works fine. DB operations work fine.

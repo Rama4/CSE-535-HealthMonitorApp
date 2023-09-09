@@ -69,11 +69,11 @@ export default function HomeScreen({navigation}) {
     navigation.navigate('History');
   };
 
-  const renderTableOperationButtons = () => {
+  const renderHistoryButton = () => {
     return (
       <>
         <View style={styles.rowContainer}>
-          <Button title="See Symptom History" onPress={onHistoryPress} />
+          <Button title="See symptom data history" onPress={onHistoryPress} />
         </View>
       </>
     );
@@ -105,7 +105,7 @@ export default function HomeScreen({navigation}) {
           {/* <Button title="Upload Signs" onPress={onUploadSignsPress} /> */}
         </View>
       </View>
-      {renderTableOperationButtons()}
+      {renderHistoryButton()}
     </View>
   );
 }
