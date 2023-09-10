@@ -160,22 +160,20 @@ run app in Production mode:
         configured Redux, all update actions working.
         symptoms array index update working.
 
-# Make UI look better, sync all values with redux and use it when inserting row into DB,
+## Make UI look better, sync all values with redux and use it when inserting row into DB,
 
     insert row and print table functionality working, takes values from redux store.
     redux connection is working for all screens.
 
-# Display DB table in seperate Screen
+## Display DB table in seperate Screen
 
     guide: https://www.waldo.com/blog/react-native-table
 
         yarn add react-native-table-component
 
-# release apk for testing on device
+## release apk for testing on device
 
     generated a keytool file inside OpenJdK's java path (found using "which java" command), used it to generate a keystore file
-
-
 
         cd "C:\Program Files\OpenJDK\openjdk-11.0.15_10\bin\"
 
@@ -184,9 +182,13 @@ run app in Production mode:
 
     Disabled Upload symptoms button if heart rate or resp rate is null.
 
+        cd android
+        ./gradlew assembleRelease
+
+
     release apk works fine. DB operations work fine.
 
-# toast messages and UX improvements
+## toast messages and UX improvements
 
     https://www.npmjs.com/package/react-native-toast-message
 
@@ -199,8 +201,13 @@ run app in Production mode:
     Home screen:
         show camera -> measure heart rate (button disabled until calculation over).
 
-# Heart rate calculation faster and more accurate
+## Heart rate calculation faster and more accurate
 
-    reduce camera video record quality
+    reduce camera video record quality to 480p -> speed of processing 45 second video is incerased to 10 secs.
     bring all constants of HeartRate monitor algorithm from native to js side for faster testing of values.
     message for user to view table contents from the "See symptom history" button in home screen.
+
+## Accelerometer accurate value
+
+    removed the unused react-native-video package
+    archived video playback code to a seperate file for future use.

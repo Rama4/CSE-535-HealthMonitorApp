@@ -8,14 +8,7 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
-import {
-  Camera,
-  FlashMode,
-  CameraType,
-  requestCameraPermissionsAsync,
-  VideoQuality,
-} from 'expo-camera';
-// import Video from 'react-native-video';
+import {Camera, FlashMode, CameraType, VideoQuality} from 'expo-camera';
 import RNFS from 'react-native-fs';
 import Button from './Button';
 
@@ -64,22 +57,9 @@ export default function CameraView({navigation}) {
 
   const [flashMode, setFlashMode] = React.useState(FlashMode.off);
 
-  // const video = useRef(null);
-  // const [isVideoPaused, setIsVideoPaused] = useState(false);
-
   useEffect(() => {
     console.log('_heartRate = ', _heartRate);
   }, [_heartRate]);
-
-  const __handleFlashMode = () => {
-    if (flashMode === FlashMode.on) {
-      setFlashMode(FlashMode.off);
-    } else if (flashMode === FlashMode.off) {
-      setFlashMode(FlashMode.torch);
-    } else {
-      setFlashMode(FlashMode.auto);
-    }
-  };
 
   useEffect(() => {
     async function getPermission() {
@@ -144,7 +124,7 @@ export default function CameraView({navigation}) {
               .finally(() => {
                 // Now 'videoPath' contains the path to the saved video
                 console.log('Video saved at:', videoPath);
-                HeartRateMonitorModule.extractFrames(
+                HeartRateMonitorModule.calculateHeartRateFromVideo(
                   HeartRateCalcThreshold,
                   VideoDurationSec,
                   FrameTime,
@@ -152,16 +132,16 @@ export default function CameraView({navigation}) {
                   HeightEnd,
                   WidthStart,
                   WidthEnd,
-                  (res, rate) => {
+                  (status, rate) => {
                     setCameraBtnDisabled(false);
                     setHeartRate(rate);
                     dispatch(updateHeartRate(rate));
                     setMessage(`Your Heart Rate is: ${rate} bpm`);
                     console.log(
-                      'HeartRateMonitorModule.extractFrames:rate=',
+                      'HeartRateMonitorModule.calculateHeartRateFromVideo:rate=',
                       rate,
                       'result = ',
-                      res,
+                      status,
                     );
                   },
                 );
@@ -189,40 +169,6 @@ export default function CameraView({navigation}) {
     }
   };
 
-  const renderCapturedVideo = () => {
-    {
-      // <>
-      //   {record && (
-      //     <Video
-      //       ref={video}
-      //       style={styles.video}
-      //       source={{
-      //         uri: record,
-      //       }}
-      //       useNativeControls
-      //       resizeMode="contain"
-      //       paused={isVideoPaused}
-      //       onPlaybackStatusUpdate={status =>
-      //         console.log('onPlaybackStatusUpdate:', status)
-      //       }
-      //     />
-      //   )}
-      //   <Button
-      //     title={
-      //       flashMode !== FlashMode.on ? 'Turn on Flash' : 'Turn off Flash'
-      //     }
-      //     onPress={__handleFlashMode}
-      //   />
-      //   <View style={styles.buttonHalfContainer}>
-      //     <Button
-      //       title={!isVideoPaused ? 'Pause' : 'Play'}
-      //       onPress={() => setIsVideoPaused(_isVideoPaused => !_isVideoPaused)}
-      //     />
-      //   </View>
-      // </>;
-    }
-  };
-
   if (hasCameraPermission === null || hasAudioPermission === null) {
     return <Text>Permissions are null</Text>;
   }
@@ -244,9 +190,9 @@ export default function CameraView({navigation}) {
           )}
         </View>
         <View style={styles.cameraContainer}>
-          {renderCapturedVideo()}
-
-          <Text style={styles.heartRatetext}>{message}</Text>
+          <Text style={[styles.heartRatetext, {fontWeight: 'bold'}]}>
+            {message}
+          </Text>
         </View>
       </View>
       <View style={styles.buttonsContainer}>

@@ -11,9 +11,10 @@ import Button from './Button';
 import {useSelector, useDispatch} from 'react-redux';
 import {selectRespRate, setRespRate} from './redux/slices/appSlice';
 
-const MeasuringIntervalSeconds = 5;
-const AccelerometerUpdateIntervalMS = 900;
-const RespiratoryMeasurementThreshold = 0.15;
+const MeasuringIntervalSeconds = 45;
+const AccelerometerUpdateIntervalMS = 300;
+const RespiratoryMeasurementThreshold = 0.08;
+const RespRateMultiplicationFactor = 60;
 const NumReadingsSkip = 1000 / AccelerometerUpdateIntervalMS;
 
 setUpdateIntervalForType(
@@ -36,9 +37,8 @@ export default function RespiratorySensor() {
     console.log('calculateRespiratoryRate2');
     let respRate = 0;
     console.log('k=', k);
-    respRate = k * 30;
-    console.log('respRate=', respRate);
-    respRate = respRate / MeasuringIntervalSeconds;
+    respRate = k * RespRateMultiplicationFactor;
+    respRate = Math.floor(respRate / MeasuringIntervalSeconds);
     console.log('respRate=', respRate);
     dispatch(setRespRate(respRate));
   }, []);
@@ -56,7 +56,6 @@ export default function RespiratorySensor() {
       )
       .subscribe({
         next: ([previous, current]) => {
-          // console.log(current);
           // omit first value
           if (!previous) return;
           if (previous !== current) {
@@ -87,31 +86,11 @@ export default function RespiratorySensor() {
       });
   }, []);
 
-  const getSubscription = useCallback(() => {
-    return accelerometer.pipe().subscribe({
-      next: current => {
-        console.log(current);
-        readingValues.push(current);
-        // setReadingValues(_readingValues => {
-        //   let newReadingValues = [...readingValues];
-        //   newReadingValues.push(current);
-        //   return newReadingValues;
-        // });
-      },
-      error: e => {
-        console.error(e);
-      },
-    });
-  }, []);
-
   useEffect(() => {
     let subscription = null;
     if (enableAccelerometer) {
       subscription = _getSubscription();
-    } else {
-      calculateRespiratoryRate2();
     }
-
     return () => {
       if (subscription) subscription.unsubscribe();
     };
@@ -129,23 +108,34 @@ export default function RespiratorySensor() {
     setTimeout(() => {
       setEnableAccelerometer(false);
       console.log('stopped measuring..');
+      calculateRespiratoryRate2();
     }, MeasuringIntervalSeconds * 1000);
   }, [MeasuringIntervalSeconds]);
 
   return (
     <View style={styles.container}>
       {!enableAccelerometer ? (
-        <Button
-          title="Start measuring Respiratory rate"
-          onPress={onStartMeasureRespiratoryRatePress}
-        />
+        <>
+          <Text style={styles.headline}>
+            Please lay down and place the smartphone on your chest and press the
+            "Start measuring Respiratory rate" button and breathe for{' '}
+            {MeasuringIntervalSeconds} seconds
+          </Text>
+          <Button
+            title="Start measuring Respiratory rate"
+            onPress={onStartMeasureRespiratoryRatePress}
+          />
+        </>
       ) : (
         <Text style={styles.headline}>
-          Please lay down and place the smartphone on your chest for a period of
-          45 seconds
+          Now measuring Respiratory rate, keep breathing...
         </Text>
       )}
-      <Text>Number of Breaths taken: {k}</Text>
+      {_respRate !== null ? (
+        <Text style={[styles.headline, {fontWeight: 'bold'}]}>
+          Your Respiratory Rate is: {_respRate}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -158,7 +148,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5FCFF',
   },
   headline: {
-    fontSize: 30,
+    fontSize: 20,
     textAlign: 'center',
     margin: 10,
   },
