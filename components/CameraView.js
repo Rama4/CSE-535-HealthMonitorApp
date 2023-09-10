@@ -78,6 +78,9 @@ export default function CameraView({navigation}) {
         const fileSystemPermission = await PermissionsAndroid.requestMultiple([
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
         ]);
         console.log('File System permission status:', fileSystemPermission);
         setHasFileSystemPermission(fileSystemPermission.status === 'granted');
@@ -115,37 +118,34 @@ export default function CameraView({navigation}) {
             console.log(data?.uri);
             setRecord(data?.uri);
             setMessage('Recorded heart rate, processing...');
-
             const videoPath =
-              RNFS.ExternalStorageDirectoryPath + '/HeartRateTempVideo.mp4';
-            RNFS.moveFile(data.uri, videoPath)
-              .then(() => console.log('moveFile done!'))
-              .catch(e => console.error(e))
-              .finally(() => {
-                // Now 'videoPath' contains the path to the saved video
-                console.log('Video saved at:', videoPath);
-                HeartRateMonitorModule.calculateHeartRateFromVideo(
-                  HeartRateCalcThreshold,
-                  VideoDurationSec,
-                  FrameTime,
-                  HeightStart,
-                  HeightEnd,
-                  WidthStart,
-                  WidthEnd,
-                  (status, rate) => {
-                    setCameraBtnDisabled(false);
-                    setHeartRate(rate);
-                    dispatch(updateHeartRate(rate));
-                    setMessage(`Your Heart Rate is: ${rate} bpm`);
-                    console.log(
-                      'HeartRateMonitorModule.calculateHeartRateFromVideo:rate=',
-                      rate,
-                      'result = ',
-                      status,
-                    );
-                  },
+              data.uri.split('/')[data.uri.split('/').length - 1];
+
+            console.log(videoPath);
+            // HeartRateMonitorModule.foo(videoPath);
+
+            HeartRateMonitorModule.calculateHeartRateFromVideo(
+              HeartRateCalcThreshold,
+              VideoDurationSec,
+              FrameTime,
+              HeightStart,
+              HeightEnd,
+              WidthStart,
+              WidthEnd,
+              videoPath,
+              (status, rate) => {
+                setCameraBtnDisabled(false);
+                setHeartRate(rate);
+                dispatch(updateHeartRate(rate));
+                setMessage(`Your Heart Rate is: ${rate} bpm`);
+                console.log(
+                  'HeartRateMonitorModule.calculateHeartRateFromVideo:rate=',
+                  rate,
+                  'result = ',
+                  status,
                 );
-              });
+              },
+            );
           })
           .catch(e => {
             console.error(e);

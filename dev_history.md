@@ -211,3 +211,19 @@ run app in Production mode:
 
     removed the unused react-native-video package
     archived video playback code to a seperate file for future use.
+
+## final changes
+
+    tested multiple times for accuracy, refactor, etc.
+
+https://stackoverflow.com/questions/66368126/text-color-is-overridden-to-white-when-tested-on-a-device-with-android-10-in-dar
+
+    Font color was white in devices with dark mode enabled, so made the app light - only as a workaround.
+
+## Java heartRate calc nativemodule acceses the same path that expo-camera stores the video file.
+
+    [Important Note]:
+    Iam assuming that expo-camera always stores in that location: data/com.appName/cache/Camera/file.mp4
+    this may change with device and version in future!!
+
+    Added
