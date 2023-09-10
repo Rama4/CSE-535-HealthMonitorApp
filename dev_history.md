@@ -222,8 +222,10 @@ https://stackoverflow.com/questions/66368126/text-color-is-overridden-to-white-w
 
 ## Java heartRate calc nativemodule acceses the same path that expo-camera stores the video file.
 
-    [Important Note]:
+    [Note]:
     Iam assuming that expo-camera always stores in that location: data/com.appName/cache/Camera/file.mp4
     this may change with device and version in future!!
 
-    Added
+    [Note]:
+    The docs state that the video is saved in cache directory only, so no issues as of now:
+        https://docs.expo.dev/versions/latest/sdk/camera/#recordasyncoptions
