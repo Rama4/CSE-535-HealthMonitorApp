@@ -15,6 +15,12 @@ export default function HomeScreen({navigation}) {
     console.log('Symptoms button pressed');
     navigation.navigate('SymptomLogging');
   };
+
+  const onMapsPress = () => {
+    console.log('onMapsPress');
+    navigation.navigate('Maps');
+  };
+
   const onMeasureRespiratoryRatePress = () => {
     console.log('Measure Respiratory Rate button pressed');
     // navigation.navigate('SymptomLogging');
@@ -91,26 +97,31 @@ export default function HomeScreen({navigation}) {
   };
 
   return (
-    <View style={styles.view}>
-      <Text style={styles.text}>
-        Please Measure the heart rate, Respiratory Rate and then log the
-        Symptoms.
-      </Text>
-      <CameraView />
-      <View style={styles.homeButtonsContainer}>
-        <View style={styles.rowContainer}>
-          <Button
-            title="Measure Respiratory Rate"
-            onPress={onRespRateSensorPress}
-          />
+    <ScrollView>
+      <View style={styles.view}>
+        <Text style={styles.text}>
+          Please Measure the heart rate, Respiratory Rate and then log the
+          Symptoms.
+        </Text>
+        <CameraView />
+        <View style={styles.homeButtonsContainer}>
+          <View style={styles.rowContainer}>
+            <Button
+              title="Measure Respiratory Rate"
+              onPress={onRespRateSensorPress}
+            />
+          </View>
+          <View style={styles.rowContainer}>
+            <Button title="Log symptoms" onPress={onSymptomsPress} />
+            {/* <Button title="Upload Signs" onPress={onUploadSignsPress} /> */}
+          </View>
+          {renderHistoryButton()}
+          <View style={styles.rowContainer}>
+            <Button title="Go to maps screen" onPress={onMapsPress} />
+          </View>
         </View>
-        <View style={styles.rowContainer}>
-          <Button title="Log symptoms" onPress={onSymptomsPress} />
-          {/* <Button title="Upload Signs" onPress={onUploadSignsPress} /> */}
-        </View>
-        {renderHistoryButton()}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
