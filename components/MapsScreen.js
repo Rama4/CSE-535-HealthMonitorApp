@@ -57,6 +57,7 @@ const sample_data2 = [
 
 export default function MapsScreen({navigation}) {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(0);
 
   const [distance, setDistance] = useState(0);
   const [timeNormal, setTimeNormal] = useState(0);
@@ -100,6 +101,7 @@ export default function MapsScreen({navigation}) {
     console.log('source=', source);
     console.log('dest=', dest);
     try {
+      setIsLoading(1);
       const response = await axios.get('https://www.google.com');
       console.log(JSON.stringify(response.status, null, 4));
       const data_element = sample_data2[0]?.elements[0];
@@ -109,6 +111,7 @@ export default function MapsScreen({navigation}) {
       setDistance(distanceInMetres);
       setTimeNormal(timeNormalSecs);
       setTimeHeavy(timeHeavySecs);
+      setIsLoading(2);
     } catch (error) {
       console.log(error);
     }
@@ -122,6 +125,7 @@ export default function MapsScreen({navigation}) {
     console.log('dest=', dest);
     try {
       const url = getDistanceMatrixUrl(source, dest);
+      setIsLoading(1);
       const response = await axios.get(url);
       const data = response?.data?.rows;
       console.log(JSON.stringify(data, null, 4));
@@ -132,21 +136,11 @@ export default function MapsScreen({navigation}) {
       setDistance(distanceInMetres);
       setTimeNormal(timeNormalSecs);
       setTimeHeavy(timeHeavySecs);
+      setIsLoading(2);
     } catch (error) {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    console.log('MapsScreen load');
-    const data_element = sample_data[0]?.elements[0];
-    const distanceInMetres = data_element?.distance?.value;
-    const timeNormalSecs = data_element?.duration?.value;
-    const timeHeavySecs = data_element?.duration_in_traffic?.value;
-    setDistance(distanceInMetres);
-    setTimeNormal(timeNormalSecs);
-    setTimeHeavy(timeHeavySecs);
-  }, []);
 
   const onSourceCoordinateChange = text => {
     console.log(text);
@@ -163,7 +157,13 @@ export default function MapsScreen({navigation}) {
 
   const renderGetDistanceMatrixButton = () => {
     // return <Button onPress={onSymptomsPressTest} title="Get Distance Matrix" />;
-    return <Button onPress={onSymptomsPress} title="Get Distance Matrix" />;
+    return (
+      <Button
+        disabled={isKeyboardOpen}
+        onPress={onSymptomsPress}
+        title="Get Distance Matrix"
+      />
+    );
   };
 
   return (
@@ -189,17 +189,26 @@ export default function MapsScreen({navigation}) {
             onChangeText={onDestinationCoordinateChange}></TextInput>
           {renderGetDistanceMatrixButton()}
           <View style={styles.resultsContainer}>
-            <Text>Distance : {roundDecimal(distanceMiles)} Miles</Text>
-            <Text>Time in normal traffic : {roundDecimal(timeNormalHrs)}</Text>
-            <Text>Time in heavy traffic : {roundDecimal(timeHeavyHrs)}</Text>
-            <Text>
-              Average velocity in normal traffic :{' '}
-              {roundDecimal(distanceMiles / timeNormalHrs)}
-            </Text>
-            <Text>
-              Average velocity in heavy traffic :{' '}
-              {roundDecimal(distanceMiles / timeHeavyHrs)}
-            </Text>
+            {isLoading === 1 && <Text>Loading..</Text>}
+            {isLoading === 2 && (
+              <>
+                <Text>Distance : {roundDecimal(distanceMiles)} Miles</Text>
+                <Text>
+                  Time in normal traffic : {roundDecimal(timeNormalHrs)}
+                </Text>
+                <Text>
+                  Time in heavy traffic : {roundDecimal(timeHeavyHrs)}
+                </Text>
+                <Text>
+                  Average velocity in normal traffic :{' '}
+                  {roundDecimal(distanceMiles / timeNormalHrs)}
+                </Text>
+                <Text>
+                  Average velocity in heavy traffic :{' '}
+                  {roundDecimal(distanceMiles / timeHeavyHrs)}
+                </Text>
+              </>
+            )}
           </View>
         </View>
       </ScrollView>
