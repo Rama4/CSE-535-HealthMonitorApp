@@ -79,7 +79,7 @@ export default function MapsScreen({navigation}) {
 
   const getDistanceInMiles = distanceInMetres => distanceInMetres / 1609.344;
 
-  const distanceMiles = getDistanceInMiles(distance);
+  const distanceMiles = distance;
   const timeNormalHrs = timeNormal / 3600;
   const timeHeavyHrs = timeHeavy / 3600;
 
@@ -96,8 +96,8 @@ export default function MapsScreen({navigation}) {
 
   const onSymptomsPressTest = async () => {
     console.log('Symptoms button pressed');
-    const source = sourceCoordiante.split(',').join('%2C');
-    const dest = destinationCoordiante.split(',').join('%2C');
+    const source = sourceCoordiante;
+    const dest = destinationCoordiante;
     console.log('source=', source);
     console.log('dest=', dest);
     try {
@@ -119,8 +119,8 @@ export default function MapsScreen({navigation}) {
 
   const onSymptomsPress = async () => {
     console.log('Symptoms button pressed');
-    const source = sourceCoordiante.split(',').join('%2C');
-    const dest = destinationCoordiante.split(',').join('%2C');
+    const source = sourceCoordiante;
+    const dest = destinationCoordiante;
     console.log('source=', source);
     console.log('dest=', dest);
     try {

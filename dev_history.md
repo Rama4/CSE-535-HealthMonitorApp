@@ -229,3 +229,10 @@ https://stackoverflow.com/questions/66368126/text-color-is-overridden-to-white-w
     [Note]:
     The docs state that the video is saved in cache directory only, so no issues as of now:
         https://docs.expo.dev/versions/latest/sdk/camera/#recordasyncoptions
+
+## Add Google Maps DistanceMatrix API
+
+    get the distance and duration in normal and heavy traffic conditions.
+
+    sample api call:
+    https://maps.googleapis.com/maps/api/distancematrix/json?origins=33.40939294282564,-111.92036727216396&destinations=33.43577345128576,-112.00883875389681&departure_time=now&key=API_KEY
