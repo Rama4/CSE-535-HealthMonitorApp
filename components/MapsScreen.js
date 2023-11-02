@@ -62,6 +62,8 @@ export default function MapsScreen({navigation}) {
   const [distance, setDistance] = useState(0);
   const [timeNormal, setTimeNormal] = useState(0);
   const [timeHeavy, setTimeHeavy] = useState(0);
+  const [timeNormalTxt, setTimeNormalTxt] = useState(0);
+  const [timeHeavyTxt, setTimeHeavyTxt] = useState(0);
   const [sourceCoordiante, setSourceCoordiante] = useState(
     '33.40939294282564,-111.92036727216396',
   );
@@ -78,10 +80,12 @@ export default function MapsScreen({navigation}) {
     `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origins}&destinations=${destinations}&departure_time=${departure_time}&units=${units}&key=${API_KEY}`;
 
   const getDistanceInMiles = distanceInMetres => distanceInMetres / 1609.344;
+  const getDistanceInKilometers = distanceInMetres => distanceInMetres / 1000;
 
-  const distanceMiles = distance;
-  const timeNormalHrs = timeNormal / 3600;
-  const timeHeavyHrs = timeHeavy / 3600;
+  const timeNormalMins = timeNormal / 60;
+  const timeHeavyMins = timeHeavy / 60;
+  const timeHeavyHrs = timeHeavyMins / 60;
+  const timeNormalHrs = timeNormalMins / 60;
 
   useEffect(() => {
     console.log(
@@ -133,9 +137,13 @@ export default function MapsScreen({navigation}) {
       const distanceInMetres = data_element?.distance?.value;
       const timeNormalSecs = data_element?.duration?.value;
       const timeHeavySecs = data_element?.duration_in_traffic?.value;
+      const _timeNormalTxt = data_element?.duration?.text;
+      const _timeHeavyTxt = data_element?.duration_in_traffic?.text;
       setDistance(distanceInMetres);
       setTimeNormal(timeNormalSecs);
       setTimeHeavy(timeHeavySecs);
+      setTimeNormalTxt(_timeNormalTxt);
+      setTimeHeavyTxt(_timeHeavyTxt);
       setIsLoading(2);
     } catch (error) {
       console.log(error);
@@ -166,6 +174,28 @@ export default function MapsScreen({navigation}) {
     );
   };
 
+  const renderDetails = () => {
+    return (
+      <>
+        <Text>
+          Distance : {roundDecimal(getDistanceInKilometers(distance))}{' '}
+          Kilometers
+        </Text>
+        <Text>Time in normal traffic : {timeNormalTxt}</Text>
+        <Text>Time in heavy traffic : {timeHeavyTxt}</Text>
+        <Text>
+          Average velocity in normal traffic :{' '}
+          {roundDecimal(getDistanceInKilometers(distance) / timeNormalHrs)}{' '}
+          Km/hr
+        </Text>
+        <Text>
+          Average velocity in heavy traffic :{' '}
+          {roundDecimal(getDistanceInKilometers(distance) / timeHeavyHrs)} Km/hr
+        </Text>
+      </>
+    );
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -190,25 +220,7 @@ export default function MapsScreen({navigation}) {
           {renderGetDistanceMatrixButton()}
           <View style={styles.resultsContainer}>
             {isLoading === 1 && <Text>Loading..</Text>}
-            {isLoading === 2 && (
-              <>
-                <Text>Distance : {roundDecimal(distanceMiles)} Miles</Text>
-                <Text>
-                  Time in normal traffic : {roundDecimal(timeNormalHrs)}
-                </Text>
-                <Text>
-                  Time in heavy traffic : {roundDecimal(timeHeavyHrs)}
-                </Text>
-                <Text>
-                  Average velocity in normal traffic :{' '}
-                  {roundDecimal(distanceMiles / timeNormalHrs)}
-                </Text>
-                <Text>
-                  Average velocity in heavy traffic :{' '}
-                  {roundDecimal(distanceMiles / timeHeavyHrs)}
-                </Text>
-              </>
-            )}
+            {isLoading === 2 && renderDetails()}
           </View>
         </View>
       </ScrollView>
